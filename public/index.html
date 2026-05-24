@@ -35,7 +35,7 @@
 
   <div class="active-counter">
     <span class="active-dot"></span>
-    <span id="active-count">—</span> 人が、今ここにいます
+    <span id="active-count">—</span>
   </div>
 
   <div class="question-card">
@@ -70,7 +70,7 @@
 <div id="write" class="screen">
   <button class="back-btn" onclick="showScreen('home')">← もどる</button>
   <div class="write-question" id="write-question"></div>
-  <textarea class="journal-area" id="journal-input" placeholder="思うままに。短くてもいい。"></textarea>
+  <textarea class="journal-area" id="journal-input" placeholder="思うままに。短くてもいい。答えなくてもいい。"></textarea>
   <div class="char-row">
     <span id="char-count" style="color:var(--text3);font-size:11px;letter-spacing:0.1em">0</span>
   </div>
@@ -82,7 +82,7 @@
       <span class="checkbox-custom"></span>
       みんなの光に匿名で公開する
     </label>
-    <p class="privacy-note">※公開にチェックを入れた場合のみ、「みんなの光」に匿名の星として届きます。名前や個人情報は一切公開されません。</p>
+    <p class="privacy-note">※チェックを入れて保存すると、書いた文章の中身は誰にも見えませんが、<b>「ひとつの瞬く星」</b>としてみんなの空に静かに灯ります。</p>
   </div>
 
   <button class="save-btn" id="save-btn" onclick="saveEntry()">そっとしまう</button>
@@ -104,26 +104,25 @@
   <div class="pattern-card hidden" id="pattern-card">
     <div class="pattern-label">✦ パターンの気づき</div>
     <div class="pattern-text" id="pattern-text">まだ分析がありません。</div>
-    <!-- 通信削減のため手動で更新をコントロール -->
     <button class="pattern-update-btn" id="pattern-update-btn" onclick="updateAIAnalysis()">新しい気づきを受け取る</button>
   </div>
   <div class="entry-list" id="entry-list"></div>
 </div>
 
-<!-- MEMOS -->
+<!-- MEMOS (5大カテゴリ構造へアップデート) -->
 <div id="memos" class="screen">
   <button class="back-btn" onclick="showScreen('home')">← もどる</button>
   <div class="screen-title">気をつけること</div>
-  <div class="screen-sub">普段から大切にしたいことを残しておく。</div>
+  <div class="screen-sub">普段から大切にしたい約束や気づきを留めておく。</div>
 
   <div class="memo-add-form">
-    <input type="text" id="memo-input" class="memo-input" placeholder="メモを追加する…" maxlength="60">
+    <input type="text" id="memo-input" class="memo-input" placeholder="心に留めたいことを書く…" maxlength="60">
     <div class="memo-cats">
-      <button class="mcat-btn active" data-cat="こころ">こころ</button>
-      <button class="mcat-btn" data-cat="からだ">からだ</button>
-      <button class="mcat-btn" data-cat="習慣">習慣</button>
-      <button class="mcat-btn" data-cat="関係">関係</button>
-      <button class="mcat-btn" data-cat="その他">その他</button>
+      <button class="mcat-btn active" data-cat="内省の方向性">内省の方向性</button>
+      <button class="mcat-btn" data-cat="普段の心がけ">普段の心がけ</button>
+      <button class="mcat-btn" data-cat="自信の蓄積">自信の蓄積</button>
+      <button class="mcat-btn" data-cat="日々の気づき">日々の気づき</button>
+      <button class="mcat-btn" data-cat="内省のメモ">内省のメモ</button>
     </div>
     <button class="btn-primary" style="margin-top:12px" onclick="addMemo()">追加する</button>
   </div>
@@ -149,17 +148,16 @@
   <div id="stamp-board"></div>
 </div>
 
-<!-- COMMUNITY -->
+<!-- COMMUNITY (言葉のない、瞬くだけの星座空間) -->
 <div id="community" class="screen">
   <button class="back-btn" onclick="showScreen('home')">← もどる</button>
   <div class="screen-title">みんなの光</div>
-  <div class="screen-sub">比べない。でも一人じゃない。</div>
-  <div class="active-counter" style="margin:12px 0 20px">
-    <span class="active-dot"></span>
-    <span id="active-count2">—</span> 人が、今ここにいます
+  <div class="screen-sub">言葉は交わさない。でも、一人じゃない。</div>
+  
+  <div class="constellation-wrapper">
+    <div class="constellation" id="constellation"></div>
+    <div class="constellation-overlay-msg" id="constellation-msg"></div>
   </div>
-  <div class="constellation" id="constellation"></div>
-  <div class="pub-list" id="pub-list"></div>
 </div>
 
 <div class="toast" id="toast"></div>
