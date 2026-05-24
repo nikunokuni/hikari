@@ -1,1 +1,168 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ひかり — 心の声を聴く場所</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Antique+Soft&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="starCanvas"></canvas>
+
+<!-- MEMORY POPUP -->
+<div id="memory-popup" class="memory-popup hidden">
+  <div class="memory-inner">
+    <div class="memory-label">✦ 過去のひかり</div>
+    <div class="memory-q" id="memory-q"></div>
+    <div class="memory-text" id="memory-text"></div>
+    <div class="memory-date" id="memory-date"></div>
+    <button class="memory-close" onclick="closeMemory()">そっと閉じる</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="home-header">
+    <div class="home-logo">ひかり</div>
+    <div class="home-sub">心の声を聴く場所</div>
+  </div>
+  <div class="home-welcome">
+    <p id="welcome-text">おかえり。<br>今日も、ここにいていい。</p>
+  </div>
+
+  <div class="active-counter">
+    <span class="active-dot"></span>
+    <span id="active-count">—</span>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">今日の問いかけ</div>
+    <div class="question-text" id="home-question">
+      <span class="loading-dots"><span></span><span></span><span></span></span>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="goWrite()">書く</button>
+
+  <div class="nav-grid">
+    <button class="btn-nav" onclick="showScreen('questions')">問いを選ぶ</button>
+    <button class="btn-nav" onclick="showScreen('timeline')">振り返る</button>
+    <button class="btn-nav" onclick="showScreen('memos')">気をつけること</button>
+    <button class="btn-nav" onclick="showScreen('community')">みんなの光</button>
+  </div>
+
+  <div class="bottom-row">
+    <div class="streak-box">
+      <div class="streak-num" id="streak-num">0</div>
+      <div class="streak-label">日つづいています</div>
+    </div>
+    <div class="stamp-box" onclick="showScreen('stamps')">
+      <div class="stamp-preview" id="stamp-preview">🌟</div>
+      <div class="streak-label">スタンプ</div>
+    </div>
+  </div>
+</div>
+
+<!-- WRITE -->
+<div id="write" class="screen">
+  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
+  <div class="write-question" id="write-question"></div>
+  <textarea class="journal-area" id="journal-input" placeholder="思うままに。短くてもいい。答えなくてもいい。"></textarea>
+  <div class="char-row">
+    <span id="char-count" style="color:var(--text3);font-size:11px;letter-spacing:0.1em">0</span>
+  </div>
+
+  <!-- PRIVACY-FIRST OPT-IN -->
+  <div class="privacy-opt-container">
+    <label class="privacy-checkbox-label">
+      <input type="checkbox" id="vis-public-checkbox" onchange="toggleVis()">
+      <span class="checkbox-custom"></span>
+      みんなの光に匿名で公開する
+    </label>
+    <p class="privacy-note">※チェックを入れて保存すると、書いた文章の中身は誰にも見えませんが、<b>「ひとつの瞬く星」</b>としてみんなの空に静かに灯ります。</p>
+  </div>
+
+  <button class="save-btn" id="save-btn" onclick="saveEntry()">そっとしまう</button>
+</div>
+
+<!-- QUESTIONS -->
+<div id="questions" class="screen">
+  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
+  <div class="screen-title">問いを選ぶ</div>
+  <div class="screen-sub">気になるものを、ひとつ。</div>
+  <div class="category-row" id="cat-row"></div>
+  <div class="question-list" id="question-list"></div>
+</div>
+
+<!-- TIMELINE -->
+<div id="timeline" class="screen">
+  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
+  <div class="screen-title">振り返る</div>
+  <div class="pattern-card hidden" id="pattern-card">
+    <div class="pattern-label">✦ パターンの気づき</div>
+    <div class="pattern-text" id="pattern-text">まだ分析がありません。</div>
+    <button class="pattern-update-btn" id="pattern-update-btn" onclick="updateAIAnalysis()">新しい気づきを受け取る</button>
+  </div>
+  <div class="entry-list" id="entry-list"></div>
+</div>
+
+<!-- MEMOS (5大カテゴリ構造へアップデート) -->
+<div id="memos" class="screen">
+  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
+  <div class="screen-title">気をつけること</div>
+  <div class="screen-sub">普段から大切にしたい約束や気づきを留めておく。</div>
+
+  <div class="memo-add-form">
+    <input type="text" id="memo-input" class="memo-input" placeholder="心に留めたいことを書く…" maxlength="60">
+    <div class="memo-cats">
+      <button class="mcat-btn active" data-cat="内省の方向性">内省の方向性</button>
+      <button class="mcat-btn" data-cat="普段の心がけ">普段の心がけ</button>
+      <button class="mcat-btn" data-cat="自信の蓄積">自信の蓄積</button>
+      <button class="mcat-btn" data-cat="日々の気づき">日々の気づき</button>
+      <button class="mcat-btn" data-cat="内省のメモ">内省のメモ</button>
+    </div>
+    <button class="btn-primary" style="margin-top:12px" onclick="addMemo()">追加する</button>
+  </div>
+
+  <div id="memo-list"></div>
+</div>
+
+<!-- STAMPS -->
+<div id="stamps" class="screen">
+  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
+  <div class="screen-title">スタンプ</div>
+  <div class="screen-sub">自分だけの目標をスタンプにする。</div>
+
+  <div class="stamp-goal-form">
+    <input type="text" id="goal-input" class="memo-input" placeholder="目標を書く（例：毎日10分書く）" maxlength="30">
+    <div class="emoji-picker" id="emoji-picker"></div>
+    <button class="btn-primary" style="margin-top:12px" onclick="addGoal()">目標を作る</button>
+  </div>
+
+  <div id="goal-list"></div>
+
+  <div class="stamp-board-title">スタンプボード</div>
+  <div id="stamp-board"></div>
+</div>
+
+<!-- COMMUNITY (言葉のない、瞬くだけの星座空間) -->
+<div id="community" class="screen">
+  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
+  <div class="screen-title">みんなの光</div>
+  <div class="screen-sub">言葉は交わさない。でも、一人じゃない。</div>
+  
+  <div class="constellation-wrapper">
+    <div class="constellation" id="constellation"></div>
+    <div class="constellation-overlay-msg" id="constellation-msg"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
