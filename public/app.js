@@ -1,8 +1,8 @@
 /* ==========================================
-   ひかり — app.js (バックエンド・Gemini同期対応版)
+   ひかり — app.js (静寂・安心・並走型内省対応)
    ========================================== */
 
-// 匿名ログイン代替用のUUID管理
+// 匿名ログイン代替用のUUID
 let userId = localStorage.getItem('hikari_user_id');
 if (!userId) {
   userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
@@ -42,14 +42,6 @@ const QUESTIONS = {
 
 const EMOJI_OPTS = ['🌟','🌙','☀️','🌿','💧','🔥','🕊️','🌸','⭐','🌊','🍃','✨','🪷','🫧','🌱'];
 
-const MOCK_PUBLIC = [
-  { text: '今日は少し、からだが重かった。でも、それでいいと思えた。', time: '3時間前' },
-  { text: 'ずっと好きだったことを、またやってみた。思ったより楽しかった。', time: '5時間前' },
-  { text: '答えを出さなくていいと知って、すこし楽になった気がする。', time: '9時間前' },
-  { text: '誰かに話せないことを、ここに置いてきた。', time: '14時間前' },
-  { text: 'なんとなく、空を見上げた。それだけで、少し変わった気がした。', time: '昨日' },
-];
-
 // ===== STATE =====
 let currentQuestion = '';
 let visibility = 'private';
@@ -57,8 +49,8 @@ let entries = [];
 let memos = [];
 let goals = [];
 let stampBoard = [];
-let aiAnalysis = ''; // AI分析結果のローカルキャッシュ
-let activeMemocat = 'こころ';
+let aiAnalysis = ''; 
+let activeMemocat = '内省の方向性'; // 新カテゴリのデフォルト
 let selectedEmoji = '🌟';
 let activeCat = 'からだ';
 
@@ -69,6 +61,16 @@ function load() {
   try { goals     = JSON.parse(localStorage.getItem('hikari_goals')     || '[]'); } catch { goals = []; }
   try { stampBoard= JSON.parse(localStorage.getItem('hikari_stamps')    || '[]'); } catch { stampBoard = []; }
   try { aiAnalysis= localStorage.getItem('hikari_analysis')            || ''; } catch { aiAnalysis = ''; }
+
+  // 初めてアプリを使うユーザーに、迷わないための「内省の方向性（ガイド）」をプリセット
+  if (memos.length === 0) {
+    memos = [
+      { id: 1, text: "今日、からだがホッとした瞬間はどこでしたか？（からだの声）", cat: "内省の方向性" },
+      { id: 2, text: "最近、自分の心が『少し窮屈だな』と感じたのはどんな場面でしたか？（きもちの整理）", cat: "内省の方向性" },
+      { id: 3, text: "嬉しかったことではなく、『ただ、ほっとしたこと』を1つ探してみる。（心地よさの探求）", cat: "内省の方向性" }
+    ];
+    save();
+  }
 }
 
 function save() {
@@ -79,7 +81,7 @@ function save() {
   localStorage.setItem('hikari_analysis',  aiAnalysis);
 }
 
-// ===== DATABASE SYNC (BACKEND) =====
+// ===== DATABASE SYNC =====
 async function syncWithBackend() {
   try {
     const res = await fetch(`/api/sync?userId=${userId}`);
@@ -87,7 +89,6 @@ async function syncWithBackend() {
     const result = await res.json();
     
     if (result.data) {
-      // データベースにデータが存在する場合：ローカルにマージ
       const d = result.data;
       entries = d.entries || [];
       memos = d.memos || [];
@@ -97,11 +98,10 @@ async function syncWithBackend() {
       save();
       updateStreak();
     } else {
-      // データベースにデータがない場合：ローカルデータをプッシュして同期
       await pushToBackend();
     }
   } catch (e) {
-    console.warn("バックエンドとの同期がオフラインのためスキップされました:", e);
+    console.warn("同期がオフラインのためスキップされました:", e);
   }
 }
 
@@ -114,7 +114,7 @@ async function pushToBackend() {
       body: JSON.stringify({ userId, data: payload })
     });
   } catch (e) {
-    console.warn("バックエンドへの保存に失敗しました:", e);
+    console.warn("同期保存に失敗しました:", e);
   }
 }
 
@@ -135,10 +135,9 @@ function goWrite() {
   
   const input = document.getElementById('journal-input');
   input.value = '';
-  input.style.height = 'auto'; // 縦幅初期化
+  input.style.height = 'auto'; 
   document.getElementById('char-count').textContent = '0';
   
-  // 心理的安全性：公開チェックボックス初期化 (デフォルト非公開)
   const cb = document.getElementById('vis-public-checkbox');
   cb.checked = false;
   visibility = 'private';
@@ -149,7 +148,7 @@ function toggleVis() {
   visibility = isChecked ? 'public' : 'private';
 }
 
-// 入力欄の自動サイズ調整機能
+// 入力欄の自動拡張
 const journalArea = document.getElementById('journal-input');
 journalArea.addEventListener('input', function () {
   document.getElementById('char-count').textContent = this.value.length;
@@ -162,9 +161,9 @@ async function saveEntry() {
   const text = document.getElementById('journal-input').value.trim();
   if (!text) { showToast('何か書いてみましょう。'); return; }
   
-  // 心理的安全性：C案のダブル確認ダイアログ
+  // 心理的安全性：ダブル確認
   if (visibility === 'public') {
-    const confirmPublish = confirm("この内容を「みんなの光」に公開しますか？\n（あなたのお名前や個人情報は一切公開されず、完全に匿名となります）");
+    const confirmPublish = confirm("この内容を「みんなの光」に灯しますか？\n（あなたの具体的な文章は誰にも見えません。『瞬く星』として気配だけが灯ります）");
     if (!confirmPublish) return;
   }
   
@@ -178,7 +177,7 @@ async function saveEntry() {
   
   entries.unshift(entry);
   save();
-  await pushToBackend(); // DBに同期保存
+  await pushToBackend(); 
   updateStreak();
   spawnParticles();
   showToast('そっとしまいました。');
@@ -200,15 +199,33 @@ function updateStreak() {
   document.getElementById('streak-num').textContent = streak;
 }
 
-// ===== ACTIVE USERS (simulated) =====
+// ===== ACTIVE USERS & MESSAGES (0〜2人のための温かい演出) =====
+let simulatedActiveCount = 0;
+
 function updateActiveUsers() {
-  const base = 12 + Math.floor(Math.random() * 18);
-  document.getElementById('active-count').textContent = base;
-  const el2 = document.getElementById('active-count2');
-  if (el2) el2.textContent = base;
+  // 深夜帯のリアリティを出すために、0〜5人の間でゆらぎを持たせる
+  // 意図的に0人〜2人が発生しやすい設定
+  const rand = Math.random();
+  if (rand < 0.25) {
+    simulatedActiveCount = 0;
+  } else if (rand < 0.45) {
+    simulatedActiveCount = 1;
+  } else if (rand < 0.65) {
+    simulatedActiveCount = 2;
+  } else {
+    simulatedActiveCount = 3 + Math.floor(Math.random() * 4);
+  }
+
+  // ホーム画面のカウンター更新
+  const counterEl = document.getElementById('active-count');
+  if (simulatedActiveCount === 0) {
+    counterEl.textContent = '0';
+  } else {
+    counterEl.textContent = simulatedActiveCount;
+  }
 }
 
-// ===== TIMELINE (APIを呼ばず、ストレージキャッシュを参照) =====
+// ===== TIMELINE =====
 function renderTimeline() {
   const list = document.getElementById('entry-list');
   const patCard = document.getElementById('pattern-card');
@@ -220,26 +237,23 @@ function renderTimeline() {
   list.innerHTML = entries.slice(0, 20).map(e => {
     const d = new Date(e.date);
     const ds = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-    const safe = escHtml(e.text);
     return `<div class="entry-item">
       <div class="entry-date">${ds}</div>
       <div class="entry-q">${escHtml(e.question)}</div>
-      <div class="entry-body">${safe}</div>
-      <span class="entry-vis">${e.visibility === 'public' ? '公開' : '自分だけ'}</span>
+      <div class="entry-body">${escHtml(e.text)}</div>
+      <span class="entry-vis">${e.visibility === 'public' ? '星空に灯した' : '自分だけ'}</span>
     </div>`;
   }).join('');
 
   if (entries.length >= 3) {
     patCard.classList.remove('hidden');
     const el = document.getElementById('pattern-text');
-    // 初期表示はローカル/DBのキャッシュをそのまま読み出す
     el.textContent = aiAnalysis || '3回以上書くと、AIがあなたの思考パターンからやさしい気づきを紡ぎます。下のボタンから受け取ってください。';
   } else {
     patCard.classList.add('hidden');
   }
 }
 
-// ボタンが押されたときのみGemini APIを呼ぶ
 async function updateAIAnalysis() {
   const el = document.getElementById('pattern-text');
   const btn = document.getElementById('pattern-update-btn');
@@ -255,7 +269,7 @@ async function updateAIAnalysis() {
       aiAnalysis = res;
       el.textContent = res;
       save();
-      await pushToBackend(); // DBへ更新データを同期
+      await pushToBackend();
       showToast('パターンの気づきを更新しました。');
     } else {
       el.textContent = 'うまく読み取れませんでした。もう一度お試しください。';
@@ -296,7 +310,7 @@ function selectQuestion(q) {
   setTimeout(() => goWrite(), 150);
 }
 
-// ===== MEMOS =====
+// ===== MEMOS (5大カテゴリ構造) =====
 function renderMemos() {
   const catBtns = document.querySelectorAll('.mcat-btn');
   catBtns.forEach(b => {
@@ -312,7 +326,7 @@ function renderMemos() {
   }
   list.innerHTML = Object.entries(grouped).map(([cat, items]) =>
     `<div class="memo-group">
-      <div class="memo-group-label">${cat}</div>
+      <div class="memo-group-label">✦ ${cat}</div>
       ${items.map(m => `
         <div class="memo-item">
           <div class="memo-item-text">${escHtml(m.text)}</div>
@@ -404,39 +418,91 @@ async function stampGoal(id) {
   showToast(`${g.emoji} スタンプを押しました。`);
 }
 
-// ===== COMMUNITY =====
+// ===== COMMUNITY (0〜2人の常夜灯・星の瞬き演出) =====
 function renderCommunity() {
-  const pub = entries.filter(e => e.visibility === 'public');
-  const combined = [
-    ...pub.slice(0,3).map(e => ({ text: e.text, time: 'あなたの光' })),
-    ...MOCK_PUBLIC
-  ];
-  renderConstellation(combined.length + 10);
-  const list = document.getElementById('pub-list');
-  if (!combined.length) {
-    list.innerHTML = '<div class="empty-state">まだ公開されている光がありません。</div>';
-    return;
+  const container = document.getElementById('constellation');
+  const msgEl = document.getElementById('constellation-msg');
+  container.innerHTML = '';
+
+  updateActiveUsers(); // カウンターを最新化
+
+  // メッセージと常夜灯(導き星)の制御
+  if (simulatedActiveCount === 0) {
+    msgEl.innerHTML = "今はあなただけの、極めて静かな時間です。<br>中央で静かに瞬く<b>「導き星」</b>が、そっとあなたに並走しています。";
+    
+    // 導き星（常夜灯）を中央にレンダリング
+    const guide = document.createElement('div');
+    guide.className = 'guide-star';
+    container.appendChild(guide);
+
+    // 寂しくないよう、周囲にさらに4つの極めて優しい背景星
+    renderSoftBackgroundStars(container, 4);
+
+  } else if (simulatedActiveCount === 1) {
+    msgEl.innerHTML = "あなたを含めて <b>1 人</b>の静かな光が、いまここに灯っています。<br>この夜を、静かに分かち合いましょう。";
+    
+    const guide = document.createElement('div');
+    guide.className = 'guide-star';
+    container.appendChild(guide);
+    renderSoftBackgroundStars(container, 6);
+
+  } else if (simulatedActiveCount === 2) {
+    msgEl.innerHTML = "あなたを含めて <b>2 人</b>の温かい光が、いまここに灯っています。<br>お互いの言葉は見えなくても、同じ空の下にいます。";
+    
+    // 2人の気配として、中心付近に2つの緩やかに瞬く星を配置
+    renderPairStars(container);
+    renderSoftBackgroundStars(container, 8);
+
+  } else {
+    msgEl.innerHTML = `あなたを含めて <b>${simulatedActiveCount} 人</b>の静かな光が、いまここに灯っています。<br>言葉のない星空で、ゆるやかに並走しています。`;
+    
+    // 3人以上のときは全体にバランスよく星を配置
+    renderSoftBackgroundStars(container, simulatedActiveCount + 10);
   }
-  list.innerHTML = combined.map(e =>
-    `<div class="pub-item">
-      <div class="pub-star">✦</div>
-      <div class="pub-body">${escHtml(e.text)}</div>
-      <div class="pub-time">${e.time}</div>
-    </div>`
-  ).join('');
-  updateActiveUsers();
 }
 
-function renderConstellation(n) {
-  const c = document.getElementById('constellation');
-  c.innerHTML = '';
-  for (let i = 0; i < n; i++) {
+// 背景用のやさしく瞬く星々をランダム配置
+function renderSoftBackgroundStars(parent, count) {
+  for (let i = 0; i < count; i++) {
     const s = document.createElement('div');
-    const size = Math.random() < 0.25 ? 3 : 2;
-    const op = 0.25 + Math.random() * 0.75;
-    s.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:var(--gold);opacity:${op};left:${4+Math.random()*92}%;top:${8+Math.random()*84}%;${Math.random()>.65?'animation:dotPulse '+(1.5+Math.random()*2)+'s ease-in-out infinite':''}`;
-    c.appendChild(s);
+    const size = Math.random() < 0.3 ? 3 : 2;
+    const op = 0.2 + Math.random() * 0.6;
+    s.style.cssText = `
+      position: absolute;
+      width: ${size}px;
+      height: ${size}px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: ${op};
+      left: ${10 + Math.random() * 80}%;
+      top: ${10 + Math.random() * 80}%;
+      animation: dotPulse ${2 + Math.random() * 3}s ease-in-out infinite;
+    `;
+    parent.appendChild(s);
   }
+}
+
+// 2人用の特別ビジュアル：中心から少し離れた対の星
+function renderPairStars(parent) {
+  const coords = [
+    { left: '40%', top: '45%' },
+    { left: '60%', top: '55%' }
+  ];
+  coords.forEach((c, idx) => {
+    const s = document.createElement('div');
+    s.style.cssText = `
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--gold2);
+      border-radius: 50%;
+      box-shadow: 0 0 16px var(--gold);
+      left: ${c.left};
+      top: ${c.top};
+      animation: dotPulse ${2.5 + idx}s ease-in-out infinite;
+    `;
+    parent.appendChild(s);
+  });
 }
 
 // ===== MEMORY POPUP =====
@@ -530,7 +596,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-// ===== STAR CANVAS =====
+// ===== STAR CANVAS (背景粒子) =====
 (function () {
   const canvas = document.getElementById('starCanvas');
   const ctx = canvas.getContext('2d');
@@ -573,7 +639,6 @@ load();
 updateStreak();
 updateActiveUsers();
 
-// バックエンドデータベースから最新状況をフェッチしたのちに起動
 syncWithBackend().then(() => {
   generateDailyQuestion();
   scheduleMemory();
