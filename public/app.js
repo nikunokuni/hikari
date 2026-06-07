@@ -53,7 +53,7 @@ let entries = [];
 let memos = [];
 let goals = [];
 let stampBoard = [];
-let aiAnalysis = ''; 
+let aiAnalysis = '';
 let activeMemocat = '内省の方向性'; // 新カテゴリのデフォルト
 let selectedGoalTag = GOAL_TAG_PRESETS[0];
 let activeCat = 'からだ';
@@ -98,7 +98,7 @@ async function syncWithBackend() {
     const res = await fetch(`/api/sync?userId=${userId}`);
     if (!res.ok) return;
     const result = await res.json();
-    
+
     if (result.data) {
       const d = result.data;
       entries = d.entries || [];
@@ -217,13 +217,13 @@ journalArea.addEventListener('input', function () {
 async function saveEntry() {
   const text = document.getElementById('journal-input').value.trim();
   if (!text) { showToast('何か書いてみましょう。'); return; }
-  
+
   // 心理的安全性：ダブル確認
   if (visibility === 'public') {
     const confirmPublish = confirm("この内容を「みんなのひかり」に灯しますか？\n（あなたの具体的な文章は誰にも見えません。『瞬く星』として気配だけが灯ります）");
     if (!confirmPublish) return;
   }
-  
+
   const entry = {
     id: Date.now(),
     question: currentQuestion,
@@ -232,7 +232,7 @@ async function saveEntry() {
     visibility,
     date: new Date().toISOString(),
   };
-  
+
   entries.unshift(entry);
   const achievedGoals = checkGoalAchievements();
   save();
@@ -285,12 +285,7 @@ function updateActiveUsers() {
   }
 
   // ホーム画面のカウンター更新
-  const counterEl = document.getElementById('active-count');
-  if (simulatedActiveCount === 0) {
-    counterEl.textContent = '0';
-  } else {
-    counterEl.textContent = simulatedActiveCount;
-  }
+  document.getElementById('active-count').textContent = simulatedActiveCount;
 }
 
 // ===== TIMELINE =====
@@ -396,7 +391,7 @@ function renderTimeline() {
 async function updateAIAnalysis() {
   const el = document.getElementById('pattern-text');
   const btn = document.getElementById('pattern-update-btn');
-  
+
   el.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span>';
   btn.disabled = true;
   btn.style.opacity = '0.5';
@@ -463,11 +458,14 @@ function selectImportantSub(sub) {
 }
 
 // ===== MEMOS (5大カテゴリ構造) =====
+function selectMemoCat(cat) {
+  activeMemocat = cat;
+  renderMemos();
+}
+
 function renderMemos() {
-  const catBtns = document.querySelectorAll('.mcat-btn');
-  catBtns.forEach(b => {
+  document.querySelectorAll('.mcat-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.cat === activeMemocat);
-    b.onclick = () => { activeMemocat = b.dataset.cat; renderMemos(); };
   });
   const grouped = {};
   memos.forEach(m => { (grouped[m.cat] = grouped[m.cat] || []).push(m); });
@@ -542,39 +540,51 @@ function selectGoalTag(tag) {
   document.getElementById('goal-tag-custom').classList.toggle('hidden', tag !== '__custom__');
 }
 
-function renderStamps() {
-  const tagRow = document.getElementById('goal-tag-row');
-  tagRow.innerHTML = GOAL_TAG_PRESETS.map(t =>
-    `<button class="gtag-btn${t === selectedGoalTag ? ' active' : ''}" data-tag="${t}" onclick="selectGoalTag('${t}')">${t}</button>`
-  ).join('') +
-    `<button class="gtag-btn${selectedGoalTag === '__custom__' ? ' active' : ''}" data-tag="__custom__" onclick="selectGoalTag('__custom__')">じぶんで書く</button>`;
-  document.getElementById('goal-tag-custom').classList.toggle('hidden', selectedGoalTag !== '__custom__');
+function goalTagChip(tag, label) {
+  const isActive = tag === selectedGoalTag;
+  return `<button class="gtag-btn${isActive ? ' active' : ''}" data-tag="${escHtml(tag)}" onclick="selectGoalTag(this.dataset.tag)">${escHtml(label)}</button>`;
+}
 
+function renderGoalTagPicker() {
+  const presetChips = GOAL_TAG_PRESETS.map(t => goalTagChip(t, t)).join('');
+  const customChip = goalTagChip('__custom__', 'じぶんで書く');
+
+  document.getElementById('goal-tag-row').innerHTML = presetChips + customChip;
+  document.getElementById('goal-tag-custom').classList.toggle('hidden', selectedGoalTag !== '__custom__');
+}
+
+function renderGoalList() {
   const goalList = document.getElementById('goal-list');
   if (!goals.length) {
     goalList.innerHTML = '<div class="empty-state" style="padding:20px 0">目標をひとつ作ってみましょう。</div>';
-  } else {
-    goalList.innerHTML = goals.map(g => {
-      const pct = Math.min(100, Math.round((g.count / g.target) * 100));
-      return `<div class="goal-item${g.achieved ? ' achieved' : ''}">
-        <div class="goal-info">
-          <div class="goal-tag-name">#${escHtml(g.tag)}</div>
-          <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
-          <div class="goal-count">${g.count} / ${g.target} 回${g.achieved ? `　${g.stamp} 達成` : ''}</div>
-        </div>
-      </div>`;
-    }).join('');
+    return;
   }
+  goalList.innerHTML = goals.map(g => {
+    const pct = Math.min(100, Math.round((g.count / g.target) * 100));
+    return `<div class="goal-item${g.achieved ? ' achieved' : ''}">
+      <div class="goal-info">
+        <div class="goal-tag-name">#${escHtml(g.tag)}</div>
+        <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
+        <div class="goal-count">${g.count} / ${g.target} 回${g.achieved ? `　${g.stamp} 達成` : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
+function renderStampBoard() {
   const board = document.getElementById('stamp-board');
-  if (!stampBoard.length) {
-    board.innerHTML = '<div style="color:var(--text3);font-size:12px;letter-spacing:0.15em;padding:8px;text-align:center">スタンプがここに積み重なります</div>';
-  } else {
-    board.innerHTML = stampBoard.map(s => `<div class="board-stamp">${s}</div>`).join('');
-  }
+  board.innerHTML = stampBoard.length
+    ? stampBoard.map(s => `<div class="board-stamp">${s}</div>`).join('')
+    : '<div class="stamp-board-empty">スタンプがここに積み重なります</div>';
 
-  const latest = stampBoard.length ? stampBoard[stampBoard.length-1] : '🌟';
+  const latest = stampBoard.length ? stampBoard[stampBoard.length - 1] : '🌟';
   document.getElementById('stamp-preview').textContent = latest;
+}
+
+function renderStamps() {
+  renderGoalTagPicker();
+  renderGoalList();
+  renderStampBoard();
 }
 
 async function addGoal() {
@@ -620,7 +630,7 @@ function renderCommunity() {
   // メッセージと常夜灯(導き星)の制御
   if (simulatedActiveCount === 0) {
     msgEl.innerHTML = "今はあなただけの、極めて静かな時間です。<br>中央で静かに瞬く<b>「導き星」</b>が、そっとあなたに並走しています。";
-    
+
     // 導き星（常夜灯）を中央にレンダリング
     const guide = document.createElement('div');
     guide.className = 'guide-star';
@@ -631,7 +641,7 @@ function renderCommunity() {
 
   } else if (simulatedActiveCount === 1) {
     msgEl.innerHTML = "あなたを含めて <b>1 人</b>の静かな光が、いまここに灯っています。<br>この夜を、静かに分かち合いましょう。";
-    
+
     const guide = document.createElement('div');
     guide.className = 'guide-star';
     container.appendChild(guide);
@@ -639,14 +649,14 @@ function renderCommunity() {
 
   } else if (simulatedActiveCount === 2) {
     msgEl.innerHTML = "あなたを含めて <b>2 人</b>の温かい光が、いまここに灯っています。<br>お互いの言葉は見えなくても、同じ空の下にいます。";
-    
+
     // 2人の気配として、中心付近に2つの緩やかに瞬く星を配置
     renderPairStars(container);
     renderSoftBackgroundStars(container, 8);
 
   } else {
     msgEl.innerHTML = `あなたを含めて <b>${simulatedActiveCount} 人</b>の静かな光が、いまここに灯っています。<br>言葉のない星空で、ゆるやかに並走しています。`;
-    
+
     // 3人以上のときは全体にバランスよく星を配置
     renderSoftBackgroundStars(container, simulatedActiveCount + 10);
   }
@@ -699,8 +709,9 @@ function renderPairStars(parent) {
 // ===== MEMORY POPUP =====
 function showMemory() {
   if (entries.length < 2) return;
-  const old = entries.filter((_, i) => i >= 1);
-  const e = old[Math.floor(Math.random() * old.length)];
+  // 直近の記録（entries[0]）以外から、過去のひとつをランダムに思い出す
+  const past = entries.slice(1);
+  const e = past[Math.floor(Math.random() * past.length)];
   const d = new Date(e.date);
   const memQ = document.getElementById('memory-q');
   memQ.textContent = e.question || '';

@@ -144,11 +144,11 @@
     <div class="memo-add-form">
       <input type="text" id="memo-input" class="memo-input" placeholder="心に留めたいことを書く…" maxlength="60">
       <div class="memo-cats">
-        <button class="mcat-btn active" data-cat="内省の方向性">内省の方向性</button>
-        <button class="mcat-btn" data-cat="普段の心がけ">普段の心がけ</button>
-        <button class="mcat-btn" data-cat="自信の蓄積">自信の蓄積</button>
-        <button class="mcat-btn" data-cat="日々の気づき">日々の気づき</button>
-        <button class="mcat-btn" data-cat="内省のメモ">内省のメモ</button>
+        <button class="mcat-btn active" data-cat="内省の方向性" onclick="selectMemoCat('内省の方向性')">内省の方向性</button>
+        <button class="mcat-btn" data-cat="普段の心がけ" onclick="selectMemoCat('普段の心がけ')">普段の心がけ</button>
+        <button class="mcat-btn" data-cat="自信の蓄積" onclick="selectMemoCat('自信の蓄積')">自信の蓄積</button>
+        <button class="mcat-btn" data-cat="日々の気づき" onclick="selectMemoCat('日々の気づき')">日々の気づき</button>
+        <button class="mcat-btn" data-cat="内省のメモ" onclick="selectMemoCat('内省のメモ')">内省のメモ</button>
       </div>
       <button class="btn-primary" style="margin-top:12px" onclick="addMemo()">追加する</button>
     </div>

@@ -811,6 +811,13 @@ body {
   border-radius: 14px;
 }
 .board-stamp { font-size: 24px; line-height: 1; }
+.stamp-board-empty {
+  color: var(--text3);
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  padding: 8px;
+  text-align: center;
+}
 
 /* ===== COMMUNITY (星座空間) ===== */
 .constellation-wrapper {
