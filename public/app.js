@@ -40,7 +40,8 @@ const QUESTIONS = {
   ],
 };
 
-const EMOJI_OPTS = ['🌟','🌙','☀️','🌿','💧','🔥','🕊️','🌸','⭐','🌊','🍃','✨','🪷','🫧','🌱'];
+const GOAL_TAG_PRESETS = ['からだ', 'きもち', '過去', 'これから', '毎日書く'];
+const ACHIEVEMENT_STAMPS = ['🏅','🎖️','🏆','💎','👑','🌈','🎉','🔮','🪄','🌠'];
 
 // ===== STATE =====
 let currentQuestion = '';
@@ -52,7 +53,7 @@ let goals = [];
 let stampBoard = [];
 let aiAnalysis = ''; 
 let activeMemocat = '内省の方向性'; // 新カテゴリのデフォルト
-let selectedEmoji = '🌟';
+let selectedGoalTag = GOAL_TAG_PRESETS[0];
 let activeCat = 'からだ';
 let activeImportantSub = 'memos';
 let memoryPopupEnabled = true;
@@ -195,11 +196,21 @@ async function saveEntry() {
   };
   
   entries.unshift(entry);
+  const achievedGoals = checkGoalAchievements();
   save();
-  await pushToBackend(); 
+  await pushToBackend();
   updateStreak();
   spawnParticles();
-  showToast('そっとしまいました。');
+
+  if (achievedGoals.length) {
+    const g = achievedGoals[0];
+    setTimeout(() => {
+      spawnParticlesFrom(null, g.stamp);
+      showToast(`✦ 「${g.tag}」の目標を達成しました。${g.stamp} が灯りました。`);
+    }, 800);
+  } else {
+    showToast('そっとしまいました。');
+  }
   setTimeout(() => showScreen('home'), 700);
 }
 
@@ -387,26 +398,74 @@ async function deleteMemo(id) {
 }
 
 // ===== STAMPS & GOALS =====
+function categoryOfQuestion(q) {
+  if (!q) return null;
+  for (const cat in QUESTIONS) {
+    if (QUESTIONS[cat].includes(q)) return cat;
+  }
+  return null;
+}
+
+// タグに応じて、これまでの記録から達成回数を自動で数える
+function countForTag(tag) {
+  if (tag === '毎日書く') return entries.length;
+  if (GOAL_TAG_PRESETS.includes(tag)) {
+    return entries.filter(e => categoryOfQuestion(e.question) === tag).length;
+  }
+  return entries.filter(e => e.text.includes(tag)).length;
+}
+
+function pickAchievementStamp() {
+  const unused = ACHIEVEMENT_STAMPS.filter(s => !stampBoard.includes(s));
+  const pool = unused.length ? unused : ACHIEVEMENT_STAMPS;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// 記録が増えるたびに目標の進捗を集計し、達成していたらスタンプを贈る
+function checkGoalAchievements() {
+  const achieved = [];
+  goals.forEach(g => {
+    g.count = countForTag(g.tag);
+    if (!g.achieved && g.count >= g.target) {
+      g.achieved = true;
+      g.stamp = pickAchievementStamp();
+      stampBoard.push(g.stamp);
+      achieved.push(g);
+    }
+  });
+  return achieved;
+}
+
+function selectGoalTag(tag) {
+  selectedGoalTag = tag;
+  document.querySelectorAll('.gtag-btn').forEach(el => {
+    el.classList.toggle('active', el.dataset.tag === tag);
+  });
+  document.getElementById('goal-tag-custom').classList.toggle('hidden', tag !== '__custom__');
+}
+
 function renderStamps() {
-  const picker = document.getElementById('emoji-picker');
-  picker.innerHTML = EMOJI_OPTS.map(e =>
-    `<div class="emoji-opt${e === selectedEmoji ? ' selected':''}" onclick="selectEmoji('${e}')">${e}</div>`
-  ).join('');
+  const tagRow = document.getElementById('goal-tag-row');
+  tagRow.innerHTML = GOAL_TAG_PRESETS.map(t =>
+    `<button class="gtag-btn${t === selectedGoalTag ? ' active' : ''}" data-tag="${t}" onclick="selectGoalTag('${t}')">${t}</button>`
+  ).join('') +
+    `<button class="gtag-btn${selectedGoalTag === '__custom__' ? ' active' : ''}" data-tag="__custom__" onclick="selectGoalTag('__custom__')">じぶんで書く</button>`;
+  document.getElementById('goal-tag-custom').classList.toggle('hidden', selectedGoalTag !== '__custom__');
 
   const goalList = document.getElementById('goal-list');
   if (!goals.length) {
     goalList.innerHTML = '<div class="empty-state" style="padding:20px 0">目標をひとつ作ってみましょう。</div>';
   } else {
-    goalList.innerHTML = goals.map(g =>
-      `<div class="goal-item">
-        <div class="goal-emoji">${g.emoji}</div>
+    goalList.innerHTML = goals.map(g => {
+      const pct = Math.min(100, Math.round((g.count / g.target) * 100));
+      return `<div class="goal-item${g.achieved ? ' achieved' : ''}">
         <div class="goal-info">
-          <div class="goal-name">${escHtml(g.name)}</div>
-          <div class="goal-count">${g.count} スタンプ</div>
+          <div class="goal-tag-name">#${escHtml(g.tag)}</div>
+          <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
+          <div class="goal-count">${g.count} / ${g.target} 回${g.achieved ? `　${g.stamp} 達成` : ''}</div>
         </div>
-        <button class="goal-stamp-btn" onclick="stampGoal(${g.id})">スタンプ</button>
-      </div>`
-    ).join('');
+      </div>`;
+    }).join('');
   }
 
   const board = document.getElementById('stamp-board');
@@ -420,34 +479,21 @@ function renderStamps() {
   document.getElementById('stamp-preview').textContent = latest;
 }
 
-function selectEmoji(e) {
-  selectedEmoji = e;
-  document.querySelectorAll('.emoji-opt').forEach(el => {
-    el.classList.toggle('selected', el.textContent === e);
-  });
-}
-
 async function addGoal() {
-  const name = document.getElementById('goal-input').value.trim();
-  if (!name) { showToast('目標を書いてください。'); return; }
-  goals.push({ id: Date.now(), name, emoji: selectedEmoji, count: 0 });
+  const tag = selectedGoalTag === '__custom__'
+    ? document.getElementById('goal-tag-custom').value.trim()
+    : selectedGoalTag;
+  if (!tag) { showToast('タグを選ぶか、書いてください。'); return; }
+  const target = parseInt(document.getElementById('goal-target-input').value, 10);
+  if (!target || target < 1) { showToast('目標の回数を入力してください。'); return; }
+
+  goals.push({ id: Date.now(), tag, target, count: countForTag(tag), achieved: false, stamp: '' });
   save();
   await pushToBackend();
-  document.getElementById('goal-input').value = '';
+  document.getElementById('goal-tag-custom').value = '';
+  document.getElementById('goal-target-input').value = '';
   renderStamps();
   showToast('目標を作りました。');
-}
-
-async function stampGoal(id) {
-  const g = goals.find(g => g.id === id);
-  if (!g) return;
-  g.count++;
-  stampBoard.push(g.emoji);
-  save();
-  await pushToBackend();
-  spawnParticlesFrom(null, g.emoji);
-  renderStamps();
-  showToast(`${g.emoji} スタンプを押しました。`);
 }
 
 // ===== COMMUNITY (0〜2人の常夜灯・星の瞬き演出) =====
