@@ -39,14 +39,14 @@
     <span id="active-count">—</span>
   </div>
 
-  <div class="question-card">
+  <button class="btn-primary" onclick="goWrite()">書く</button>
+
+  <div class="question-card" onclick="goWriteWithDailyQuestion()">
     <div class="question-label">今日の問いかけ</div>
     <div class="question-text" id="home-question">
       <span class="loading-dots"><span></span><span></span><span></span></span>
     </div>
   </div>
-
-  <button class="btn-primary" onclick="goWrite()">書く</button>
 
   <div class="nav-grid">
     <button class="btn-nav" onclick="showScreen('questions')">問いを選ぶ</button>

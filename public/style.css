@@ -98,37 +98,37 @@ body {
   50%      { opacity: 0.9; transform: scale(1.1); }
 }
 
-/* Question card */
+/* Question card — a quiet, optional aid (training wheels), not the headline */
 .question-card {
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: none;
   border-radius: 16px;
-  padding: 28px 24px;
-  margin-bottom: 24px;
+  padding: 4px 6px 26px;
+  margin-bottom: 12px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: opacity 0.25s;
 }
-.question-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+.question-card:hover,
+.question-card:active {
+  opacity: 0.75;
 }
 .question-label {
   font-size: 10px;
-  color: var(--gold);
+  color: var(--text3);
   letter-spacing: 0.32em;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   text-transform: uppercase;
 }
 .question-text {
   font-family: 'Zen Antique Soft', serif;
-  font-size: 20px;
-  color: var(--gold3);
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text2);
   line-height: 1.9;
   letter-spacing: 0.06em;
-  min-height: 38px;
+  min-height: 26px;
 }
 
 /* Loading dots */

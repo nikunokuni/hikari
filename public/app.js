@@ -44,6 +44,7 @@ const EMOJI_OPTS = ['🌟','🌙','☀️','🌿','💧','🔥','🕊️','🌸'
 
 // ===== STATE =====
 let currentQuestion = '';
+let dailyQuestion = '';
 let visibility = 'private';
 let entries = [];
 let memos = [];
@@ -129,10 +130,11 @@ function showScreen(id) {
   if (id === 'stamps')    renderStamps();
 }
 
-function goWrite() {
+function goWrite(question) {
   showScreen('write');
-  document.getElementById('write-question').textContent = currentQuestion || '今、心にあることを書いてみてください。';
-  
+  currentQuestion = question || '';
+  document.getElementById('write-question').textContent = currentQuestion || '今、心にあることを、そのままに。';
+
   const input = document.getElementById('journal-input');
   input.value = '';
   input.style.height = 'auto'; 
@@ -141,6 +143,10 @@ function goWrite() {
   const cb = document.getElementById('vis-public-checkbox');
   cb.checked = false;
   visibility = 'private';
+}
+
+function goWriteWithDailyQuestion() {
+  goWrite(dailyQuestion);
 }
 
 function toggleVis() {
@@ -239,7 +245,7 @@ function renderTimeline() {
     const ds = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
     return `<div class="entry-item">
       <div class="entry-date">${ds}</div>
-      <div class="entry-q">${escHtml(e.question)}</div>
+      ${e.question ? `<div class="entry-q">${escHtml(e.question)}</div>` : ''}
       <div class="entry-body">${escHtml(e.text)}</div>
       <span class="entry-vis">${e.visibility === 'public' ? '星空に灯した' : '自分だけ'}</span>
     </div>`;
@@ -304,10 +310,10 @@ function renderQList() {
   ).join('');
 }
 function selectQuestion(q) {
-  currentQuestion = q;
+  dailyQuestion = q;
   document.getElementById('home-question').textContent = q;
   showScreen('home');
-  setTimeout(() => goWrite(), 150);
+  setTimeout(() => goWrite(q), 150);
 }
 
 // ===== MEMOS (5大カテゴリ構造) =====
@@ -511,7 +517,9 @@ function showMemory() {
   const old = entries.filter((_, i) => i >= 1);
   const e = old[Math.floor(Math.random() * old.length)];
   const d = new Date(e.date);
-  document.getElementById('memory-q').textContent = e.question;
+  const memQ = document.getElementById('memory-q');
+  memQ.textContent = e.question || '';
+  memQ.style.display = e.question ? '' : 'none';
   document.getElementById('memory-text').textContent = e.text;
   document.getElementById('memory-date').textContent =
     `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日のひかり`;
@@ -535,12 +543,12 @@ async function generateDailyQuestion() {
   const cached = localStorage.getItem('hikari_q_date');
   if (cached === today) {
     const q = localStorage.getItem('hikari_q_text') || '';
-    if (q) { currentQuestion = q; el.textContent = q; return; }
+    if (q) { dailyQuestion = q; el.textContent = q; return; }
   }
   try {
     const q = await callGemini('question');
     if (q) {
-      currentQuestion = q;
+      dailyQuestion = q;
       el.textContent = q;
       localStorage.setItem('hikari_q_date', today);
       localStorage.setItem('hikari_q_text', q);
@@ -551,8 +559,8 @@ async function generateDailyQuestion() {
     const cats = Object.keys(QUESTIONS);
     const cat = cats[Math.floor(Math.random() * cats.length)];
     const qs = QUESTIONS[cat];
-    currentQuestion = qs[Math.floor(Math.random() * qs.length)];
-    el.textContent = currentQuestion;
+    dailyQuestion = qs[Math.floor(Math.random() * qs.length)];
+    el.textContent = dailyQuestion;
   }
 }
 
