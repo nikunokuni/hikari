@@ -40,7 +40,9 @@ const QUESTIONS = {
   ],
 };
 
-const GOAL_TAG_PRESETS = ['からだ', 'きもち', '過去', 'これから', '毎日書く'];
+// 記録に付けられる「気配」タグ（プリセット）。目標のタグもこれに合わせる
+const ENTRY_TAG_PRESETS = ['心の声', '体の声', '自信', 'ネガティブ', '心地よさ', 'ご縁'];
+const GOAL_TAG_PRESETS = [...ENTRY_TAG_PRESETS, '毎日書く'];
 const ACHIEVEMENT_STAMPS = ['🏅','🎖️','🏆','💎','👑','🌈','🎉','🔮','🪄','🌠'];
 
 // ===== STATE =====
@@ -57,6 +59,8 @@ let selectedGoalTag = GOAL_TAG_PRESETS[0];
 let activeCat = 'からだ';
 let activeImportantSub = 'memos';
 let memoryPopupEnabled = true;
+let selectedEntryTags = [];
+let timelineTagFilter = null;
 
 const TAB_SCREENS = ['home', 'timeline', 'important', 'community', 'settings'];
 
@@ -151,12 +155,45 @@ function goWrite(question) {
 
   const input = document.getElementById('journal-input');
   input.value = '';
-  input.style.height = 'auto'; 
+  input.style.height = 'auto';
   document.getElementById('char-count').textContent = '0';
-  
+
   const cb = document.getElementById('vis-public-checkbox');
   cb.checked = false;
   visibility = 'private';
+
+  selectedEntryTags = [];
+  renderEntryTags();
+}
+
+// ===== ENTRY TAGS (今日の気配) =====
+function entryTagOptions() {
+  const customUsed = selectedEntryTags.filter(t => !ENTRY_TAG_PRESETS.includes(t));
+  return ENTRY_TAG_PRESETS.concat(customUsed);
+}
+
+function renderEntryTags() {
+  const row = document.getElementById('entry-tag-row');
+  if (!row) return;
+  row.innerHTML = entryTagOptions().map(t =>
+    `<button class="etag-btn${selectedEntryTags.includes(t) ? ' active' : ''}" data-tag="${escHtml(t)}" onclick="toggleEntryTag(this.dataset.tag)">${escHtml(t)}</button>`
+  ).join('');
+}
+
+function toggleEntryTag(tag) {
+  const i = selectedEntryTags.indexOf(tag);
+  if (i === -1) selectedEntryTags.push(tag);
+  else selectedEntryTags.splice(i, 1);
+  renderEntryTags();
+}
+
+function addCustomEntryTag() {
+  const input = document.getElementById('entry-tag-custom');
+  const tag = input.value.trim();
+  if (!tag) return;
+  if (!selectedEntryTags.includes(tag)) selectedEntryTags.push(tag);
+  input.value = '';
+  renderEntryTags();
 }
 
 function goWriteWithDailyQuestion() {
@@ -191,6 +228,7 @@ async function saveEntry() {
     id: Date.now(),
     question: currentQuestion,
     text,
+    tags: [...selectedEntryTags],
     visibility,
     date: new Date().toISOString(),
   };
@@ -256,7 +294,68 @@ function updateActiveUsers() {
 }
 
 // ===== TIMELINE =====
+function renderActivityChart() {
+  const msgEl = document.getElementById('activity-msg');
+  const chart = document.getElementById('activity-chart');
+  if (!msgEl || !chart) return;
+
+  const days = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+  const counts = days.map(d => entries.filter(e => {
+    const ed = new Date(e.date); ed.setHours(0,0,0,0);
+    return ed.getTime() === d.getTime();
+  }).length);
+  const max = Math.max(1, ...counts);
+  const activeDays = counts.filter(c => c > 0).length;
+
+  if (activeDays >= 6) msgEl.textContent = `この一週間、ほとんど毎日。よく自分と向き合いましたね。`;
+  else if (activeDays >= 3) msgEl.textContent = `この一週間で${activeDays}日、自分の声に耳を傾けました。`;
+  else if (activeDays >= 1) msgEl.textContent = `この一週間で${activeDays}日、そっと記録を残しました。`;
+  else msgEl.textContent = '今週の記録は、まだありません。気が向いたときに、ひとことから。';
+
+  const weekday = ['日','月','火','水','木','金','土'];
+  chart.innerHTML = days.map((d, i) => {
+    const h = counts[i] ? Math.max(10, Math.round((counts[i] / max) * 100)) : 0;
+    return `<div class="chart-col">
+      <div class="chart-count">${counts[i] || ''}</div>
+      <div class="chart-bar-track"><div class="chart-bar" style="height:${h}%"></div></div>
+      <div class="chart-label">${weekday[d.getDay()]}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTagFilterChips() {
+  const row = document.getElementById('timeline-tag-row');
+  if (!row) return;
+  const tagCounts = {};
+  entries.forEach(e => (e.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
+  const tags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
+
+  if (!tags.length) {
+    row.innerHTML = '';
+    row.classList.add('hidden');
+    return;
+  }
+  row.classList.remove('hidden');
+  row.innerHTML = `<button class="ttag-btn${!timelineTagFilter ? ' active' : ''}" onclick="selectTimelineTag(null)">すべて</button>` +
+    tags.map(t =>
+      `<button class="ttag-btn${timelineTagFilter === t ? ' active' : ''}" data-tag="${escHtml(t)}" onclick="selectTimelineTag(this.dataset.tag)">#${escHtml(t)} (${tagCounts[t]})</button>`
+    ).join('');
+}
+
+function selectTimelineTag(tag) {
+  timelineTagFilter = tag || null;
+  renderTimeline();
+}
+
 function renderTimeline() {
+  renderActivityChart();
+  renderTagFilterChips();
+
   const list = document.getElementById('entry-list');
   const patCard = document.getElementById('pattern-card');
   if (!entries.length) {
@@ -264,16 +363,26 @@ function renderTimeline() {
     patCard.classList.add('hidden');
     return;
   }
-  list.innerHTML = entries.slice(0, 20).map(e => {
-    const d = new Date(e.date);
-    const ds = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-    return `<div class="entry-item">
-      <div class="entry-date">${ds}</div>
-      ${e.question ? `<div class="entry-q">${escHtml(e.question)}</div>` : ''}
-      <div class="entry-body">${escHtml(e.text)}</div>
-      <span class="entry-vis">${e.visibility === 'public' ? '星空に灯した' : '自分だけ'}</span>
-    </div>`;
-  }).join('');
+
+  const shown = timelineTagFilter ? entries.filter(e => (e.tags || []).includes(timelineTagFilter)) : entries;
+  if (!shown.length) {
+    list.innerHTML = `<div class="empty-state">「#${escHtml(timelineTagFilter)}」の記録は、まだありません。</div>`;
+  } else {
+    list.innerHTML = shown.slice(0, 20).map(e => {
+      const d = new Date(e.date);
+      const ds = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+      const tagsHtml = (e.tags && e.tags.length)
+        ? `<div class="entry-tags">${e.tags.map(t => `<span class="entry-tag-chip">#${escHtml(t)}</span>`).join('')}</div>`
+        : '';
+      return `<div class="entry-item">
+        <div class="entry-date">${ds}</div>
+        ${e.question ? `<div class="entry-q">${escHtml(e.question)}</div>` : ''}
+        <div class="entry-body">${escHtml(e.text)}</div>
+        ${tagsHtml}
+        <span class="entry-vis">${e.visibility === 'public' ? '星空に灯した' : '自分だけ'}</span>
+      </div>`;
+    }).join('');
+  }
 
   if (entries.length >= 3) {
     patCard.classList.remove('hidden');
@@ -398,21 +507,10 @@ async function deleteMemo(id) {
 }
 
 // ===== STAMPS & GOALS =====
-function categoryOfQuestion(q) {
-  if (!q) return null;
-  for (const cat in QUESTIONS) {
-    if (QUESTIONS[cat].includes(q)) return cat;
-  }
-  return null;
-}
-
-// タグに応じて、これまでの記録から達成回数を自動で数える
+// タグに応じて、これまでの記録から達成回数を自動で数える（記録に付けたタグと一致したものをカウント）
 function countForTag(tag) {
   if (tag === '毎日書く') return entries.length;
-  if (GOAL_TAG_PRESETS.includes(tag)) {
-    return entries.filter(e => categoryOfQuestion(e.question) === tag).length;
-  }
-  return entries.filter(e => e.text.includes(tag)).length;
+  return entries.filter(e => (e.tags || []).includes(tag)).length;
 }
 
 function pickAchievementStamp() {
@@ -487,13 +585,28 @@ async function addGoal() {
   const target = parseInt(document.getElementById('goal-target-input').value, 10);
   if (!target || target < 1) { showToast('目標の回数を入力してください。'); return; }
 
-  goals.push({ id: Date.now(), tag, target, count: countForTag(tag), achieved: false, stamp: '' });
+  const goal = { id: Date.now(), tag, target, count: countForTag(tag), achieved: false, stamp: '' };
+  goals.push(goal);
+
+  // すでにこれまでの記録だけで目標に届いている場合は、その場でスタンプを贈る
+  if (goal.count >= goal.target) {
+    goal.achieved = true;
+    goal.stamp = pickAchievementStamp();
+    stampBoard.push(goal.stamp);
+  }
+
   save();
   await pushToBackend();
   document.getElementById('goal-tag-custom').value = '';
   document.getElementById('goal-target-input').value = '';
   renderStamps();
-  showToast('目標を作りました。');
+
+  if (goal.achieved) {
+    spawnParticlesFrom(null, goal.stamp);
+    showToast(`✦ すでに${goal.target}回、達成しています。${goal.stamp} が灯りました。`);
+  } else {
+    showToast('目標を作りました。');
+  }
 }
 
 // ===== COMMUNITY (0〜2人の常夜灯・星の瞬き演出) =====

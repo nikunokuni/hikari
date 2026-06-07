@@ -74,6 +74,16 @@
 <div id="write" class="screen">
   <button class="back-btn" onclick="showScreen('home')">← もどる</button>
   <div class="write-question" id="write-question"></div>
+
+  <div class="entry-tag-section">
+    <div class="entry-tag-label">今日の気配（いくつでも、なくても）</div>
+    <div class="entry-tag-row" id="entry-tag-row"></div>
+    <div class="entry-tag-add-row">
+      <input type="text" id="entry-tag-custom" class="entry-tag-input" placeholder="ほかの言葉で…" maxlength="12">
+      <button class="link-btn" onclick="addCustomEntryTag()">＋ 追加</button>
+    </div>
+  </div>
+
   <textarea class="journal-area" id="journal-input" placeholder="思うままに。短くてもいい。答えなくてもいい。"></textarea>
   <div class="char-row">
     <span id="char-count" style="color:var(--text3);font-size:11px;letter-spacing:0.1em">0</span>
@@ -104,6 +114,14 @@
 <!-- TIMELINE -->
 <div id="timeline" class="screen has-tabs">
   <div class="screen-title">振り返る</div>
+
+  <div class="activity-section">
+    <div class="activity-msg" id="activity-msg"></div>
+    <div class="activity-chart" id="activity-chart"></div>
+  </div>
+
+  <div class="timeline-tag-row hidden" id="timeline-tag-row"></div>
+
   <div class="pattern-card hidden" id="pattern-card">
     <div class="pattern-label">✦ パターンの気づき</div>
     <div class="pattern-text" id="pattern-text">まだ分析がありません。</div>
