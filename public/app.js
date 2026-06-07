@@ -300,7 +300,7 @@ function selectCat(c) {
 }
 function renderQList() {
   document.getElementById('question-list').innerHTML = QUESTIONS[activeCat].map(q =>
-    `<div class="q-item" onclick="selectQuestion(${JSON.stringify(q)})">${q}</div>`
+    `<div class="q-item" onclick='selectQuestion(${JSON.stringify(q)})'>${escHtml(q)}</div>`
   ).join('');
 }
 function selectQuestion(q) {
