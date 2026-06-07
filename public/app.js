@@ -54,6 +54,10 @@ let aiAnalysis = '';
 let activeMemocat = '内省の方向性'; // 新カテゴリのデフォルト
 let selectedEmoji = '🌟';
 let activeCat = 'からだ';
+let activeImportantSub = 'memos';
+let memoryPopupEnabled = true;
+
+const TAB_SCREENS = ['home', 'timeline', 'important', 'community', 'settings'];
 
 // ===== STORAGE (LOCAL) =====
 function load() {
@@ -62,6 +66,7 @@ function load() {
   try { goals     = JSON.parse(localStorage.getItem('hikari_goals')     || '[]'); } catch { goals = []; }
   try { stampBoard= JSON.parse(localStorage.getItem('hikari_stamps')    || '[]'); } catch { stampBoard = []; }
   try { aiAnalysis= localStorage.getItem('hikari_analysis')            || ''; } catch { aiAnalysis = ''; }
+  memoryPopupEnabled = localStorage.getItem('hikari_memory_popup') !== '0';
 
   // 初めてアプリを使うユーザーに、迷わないための「内省の方向性（ガイド）」をプリセット
   if (memos.length === 0) {
@@ -123,11 +128,19 @@ async function pushToBackend() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+
+  const tabBar = document.getElementById('tab-bar');
+  const onTabScreen = TAB_SCREENS.includes(id);
+  tabBar.classList.toggle('hidden', !onTabScreen);
+  if (onTabScreen) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  }
+
   if (id === 'timeline')  renderTimeline();
   if (id === 'questions') renderQuestions();
   if (id === 'community') renderCommunity();
-  if (id === 'memos')     renderMemos();
-  if (id === 'stamps')    renderStamps();
+  if (id === 'important') renderImportant();
+  if (id === 'settings')  renderSettings();
 }
 
 function goWrite(question) {
@@ -169,7 +182,7 @@ async function saveEntry() {
   
   // 心理的安全性：ダブル確認
   if (visibility === 'public') {
-    const confirmPublish = confirm("この内容を「みんなの光」に灯しますか？\n（あなたの具体的な文章は誰にも見えません。『瞬く星』として気配だけが灯ります）");
+    const confirmPublish = confirm("この内容を「みんなのひかり」に灯しますか？\n（あなたの具体的な文章は誰にも見えません。『瞬く星』として気配だけが灯ります）");
     if (!confirmPublish) return;
   }
   
@@ -314,6 +327,19 @@ function selectQuestion(q) {
   document.getElementById('home-question').textContent = q;
   showScreen('home');
   setTimeout(() => goWrite(q), 150);
+}
+
+// ===== IMPORTANT (気をつけること + スタンプ) =====
+function renderImportant() {
+  selectImportantSub(activeImportantSub);
+  renderMemos();
+  renderStamps();
+}
+function selectImportantSub(sub) {
+  activeImportantSub = sub;
+  document.querySelectorAll('.isub-btn').forEach(b => b.classList.toggle('active', b.dataset.sub === sub));
+  document.getElementById('important-memos').classList.toggle('hidden', sub !== 'memos');
+  document.getElementById('important-stamps').classList.toggle('hidden', sub !== 'stamps');
 }
 
 // ===== MEMOS (5大カテゴリ構造) =====
@@ -529,11 +555,22 @@ function closeMemory() {
   document.getElementById('memory-popup').classList.add('hidden');
 }
 function scheduleMemory() {
+  if (!memoryPopupEnabled) return;
   if (entries.length < 2) return;
   setTimeout(() => {
-    showMemory();
-    setInterval(showMemory, 90000);
+    if (memoryPopupEnabled) showMemory();
+    setInterval(() => { if (memoryPopupEnabled) showMemory(); }, 90000);
   }, 20000);
+}
+
+// ===== SETTINGS =====
+function renderSettings() {
+  document.getElementById('memory-popup-toggle').checked = memoryPopupEnabled;
+}
+function toggleMemoryPopupSetting() {
+  memoryPopupEnabled = document.getElementById('memory-popup-toggle').checked;
+  localStorage.setItem('hikari_memory_popup', memoryPopupEnabled ? '1' : '0');
+  showToast(memoryPopupEnabled ? '思い出の演出をオンにしました。' : '思い出の演出をオフにしました。');
 }
 
 // ===== DAILY QUESTION =====

@@ -24,8 +24,17 @@
   </div>
 </div>
 
+<!-- TAB BAR (always shown on the 5 main screens) -->
+<nav class="tab-bar" id="tab-bar">
+  <button class="tab-btn active" data-tab="home" onclick="showScreen('home')">ホーム画面</button>
+  <button class="tab-btn" data-tab="timeline" onclick="showScreen('timeline')">振り返る</button>
+  <button class="tab-btn" data-tab="important" onclick="showScreen('important')">大事なもの</button>
+  <button class="tab-btn" data-tab="community" onclick="showScreen('community')">みんなのひかり</button>
+  <button class="tab-btn" data-tab="settings" onclick="showScreen('settings')">設定</button>
+</nav>
+
 <!-- HOME -->
-<div id="home" class="screen active">
+<div id="home" class="screen has-tabs active">
   <div class="home-header">
     <div class="home-logo">ひかり</div>
     <div class="home-sub">心の声を聴く場所</div>
@@ -47,20 +56,14 @@
       <span class="loading-dots"><span></span><span></span><span></span></span>
     </div>
   </div>
-
-  <div class="nav-grid">
-    <button class="btn-nav" onclick="showScreen('questions')">問いを選ぶ</button>
-    <button class="btn-nav" onclick="showScreen('timeline')">振り返る</button>
-    <button class="btn-nav" onclick="showScreen('memos')">気をつけること</button>
-    <button class="btn-nav" onclick="showScreen('community')">みんなの光</button>
-  </div>
+  <button class="link-btn" onclick="showScreen('questions')">ほかの問いも見てみる →</button>
 
   <div class="bottom-row">
     <div class="streak-box">
       <div class="streak-num" id="streak-num">0</div>
       <div class="streak-label">日つづいています</div>
     </div>
-    <div class="stamp-box" onclick="showScreen('stamps')">
+    <div class="stamp-box" onclick="showScreen('important')">
       <div class="stamp-preview" id="stamp-preview">🌟</div>
       <div class="streak-label">スタンプ</div>
     </div>
@@ -81,7 +84,7 @@
     <label class="privacy-checkbox-label">
       <input type="checkbox" id="vis-public-checkbox" onchange="toggleVis()">
       <span class="checkbox-custom"></span>
-      みんなの光に匿名で公開する
+      みんなのひかりに匿名で公開する
     </label>
     <p class="privacy-note">※チェックを入れて保存すると、書いた文章の中身は誰にも見えませんが、<b>「ひとつの瞬く星」</b>としてみんなの空に静かに灯ります。</p>
   </div>
@@ -99,8 +102,7 @@
 </div>
 
 <!-- TIMELINE -->
-<div id="timeline" class="screen">
-  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
+<div id="timeline" class="screen has-tabs">
   <div class="screen-title">振り返る</div>
   <div class="pattern-card hidden" id="pattern-card">
     <div class="pattern-label">✦ パターンの気づき</div>
@@ -110,54 +112,79 @@
   <div class="entry-list" id="entry-list"></div>
 </div>
 
-<!-- MEMOS (5大カテゴリ構造へアップデート) -->
-<div id="memos" class="screen">
-  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
-  <div class="screen-title">気をつけること</div>
-  <div class="screen-sub">普段から大切にしたい約束や気づきを留めておく。</div>
+<!-- IMPORTANT (気をつけること + スタンプ を統合) -->
+<div id="important" class="screen has-tabs">
+  <div class="screen-title">大事なもの</div>
+  <div class="screen-sub">心に留めたいことと、自分だけの歩み。</div>
 
-  <div class="memo-add-form">
-    <input type="text" id="memo-input" class="memo-input" placeholder="心に留めたいことを書く…" maxlength="60">
-    <div class="memo-cats">
-      <button class="mcat-btn active" data-cat="内省の方向性">内省の方向性</button>
-      <button class="mcat-btn" data-cat="普段の心がけ">普段の心がけ</button>
-      <button class="mcat-btn" data-cat="自信の蓄積">自信の蓄積</button>
-      <button class="mcat-btn" data-cat="日々の気づき">日々の気づき</button>
-      <button class="mcat-btn" data-cat="内省のメモ">内省のメモ</button>
+  <div class="important-subtabs">
+    <button class="isub-btn active" data-sub="memos" onclick="selectImportantSub('memos')">気をつけること</button>
+    <button class="isub-btn" data-sub="stamps" onclick="selectImportantSub('stamps')">スタンプ</button>
+  </div>
+
+  <div id="important-memos">
+    <div class="memo-add-form">
+      <input type="text" id="memo-input" class="memo-input" placeholder="心に留めたいことを書く…" maxlength="60">
+      <div class="memo-cats">
+        <button class="mcat-btn active" data-cat="内省の方向性">内省の方向性</button>
+        <button class="mcat-btn" data-cat="普段の心がけ">普段の心がけ</button>
+        <button class="mcat-btn" data-cat="自信の蓄積">自信の蓄積</button>
+        <button class="mcat-btn" data-cat="日々の気づき">日々の気づき</button>
+        <button class="mcat-btn" data-cat="内省のメモ">内省のメモ</button>
+      </div>
+      <button class="btn-primary" style="margin-top:12px" onclick="addMemo()">追加する</button>
     </div>
-    <button class="btn-primary" style="margin-top:12px" onclick="addMemo()">追加する</button>
+
+    <div id="memo-list"></div>
   </div>
 
-  <div id="memo-list"></div>
-</div>
+  <div id="important-stamps" class="hidden">
+    <div class="stamp-goal-form">
+      <input type="text" id="goal-input" class="memo-input" placeholder="目標を書く（例：毎日10分書く）" maxlength="30">
+      <div class="emoji-picker" id="emoji-picker"></div>
+      <button class="btn-primary" style="margin-top:12px" onclick="addGoal()">目標を作る</button>
+    </div>
 
-<!-- STAMPS -->
-<div id="stamps" class="screen">
-  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
-  <div class="screen-title">スタンプ</div>
-  <div class="screen-sub">自分だけの目標をスタンプにする。</div>
+    <div id="goal-list"></div>
 
-  <div class="stamp-goal-form">
-    <input type="text" id="goal-input" class="memo-input" placeholder="目標を書く（例：毎日10分書く）" maxlength="30">
-    <div class="emoji-picker" id="emoji-picker"></div>
-    <button class="btn-primary" style="margin-top:12px" onclick="addGoal()">目標を作る</button>
+    <div class="stamp-board-title">スタンプボード</div>
+    <div id="stamp-board"></div>
   </div>
-
-  <div id="goal-list"></div>
-
-  <div class="stamp-board-title">スタンプボード</div>
-  <div id="stamp-board"></div>
 </div>
 
 <!-- COMMUNITY (言葉のない、瞬くだけの星座空間) -->
-<div id="community" class="screen">
-  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
-  <div class="screen-title">みんなの光</div>
+<div id="community" class="screen has-tabs">
+  <div class="screen-title">みんなのひかり</div>
   <div class="screen-sub">言葉は交わさない。でも、一人じゃない。</div>
-  
+
   <div class="constellation-wrapper">
     <div class="constellation" id="constellation"></div>
     <div class="constellation-overlay-msg" id="constellation-msg"></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="screen has-tabs">
+  <div class="screen-title">設定</div>
+  <div class="screen-sub">ここでの選択は、いつでも変えられます。</div>
+
+  <div class="settings-group">
+    <div class="settings-group-label">演出</div>
+    <label class="settings-toggle-row">
+      <span>過去のひかりを、そっと思い出させる</span>
+      <input type="checkbox" id="memory-popup-toggle" onchange="toggleMemoryPopupSetting()">
+      <span class="toggle-switch"></span>
+    </label>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-label">ひかりについて</div>
+    <p class="settings-text">「ひかり」は、誰かに見せるためではなく、自分の心の声にそっと耳を傾けるためのジャーナリングアプリです。書いたことは基本的に自分だけのもの。気が向いたときに、ひとつの星として「みんなのひかり」に灯すこともできます。</p>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-label">そのほか</div>
+    <p class="settings-text settings-text-muted">フィードバック、プライバシーポリシー、利用規約などは、近いうちにここへ加えていく予定です。</p>
   </div>
 </div>
 
