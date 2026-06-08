@@ -61,19 +61,18 @@ body {
 .tab-bar.hidden { display: none; }
 .tab-btn {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 16px 4px 13px;
+  padding: 14px 4px 12px;
   color: var(--text3);
-  font-family: 'Noto Sans JP', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  line-height: 1.5;
-  text-align: center;
   cursor: pointer;
   transition: color 0.25s, border-color 0.25s;
 }
+.tab-btn svg { width: 22px; height: 22px; }
 .tab-btn:hover { color: var(--text2); }
 .tab-btn.active { color: var(--gold2); border-bottom-color: var(--gold); }
 
