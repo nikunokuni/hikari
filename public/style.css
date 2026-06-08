@@ -544,6 +544,26 @@ body {
   transition: border-color 0.25s;
 }
 .entry-item:hover { border-color: var(--border); }
+.entry-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.entry-item-top .entry-date { margin-bottom: 0; }
+.entry-fav-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  line-height: 0;
+  color: var(--text3);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.entry-fav-btn svg { width: 18px; height: 18px; }
+.entry-fav-btn:hover { color: var(--text2); }
+.entry-fav-btn.active { color: var(--gold); }
 .entry-date { font-size: 11px; color: var(--text3); letter-spacing: 0.2em; margin-bottom: 8px; }
 .entry-q {
   font-family: 'Zen Antique Soft', serif;

@@ -61,6 +61,15 @@ function selectTimelineTag(tag) {
   renderTimeline();
 }
 
+async function toggleFavorite(id) {
+  const entry = entries.find(e => e.id === id);
+  if (!entry) return;
+  entry.favorite = !entry.favorite;
+  save();
+  await pushToBackend();
+  renderTimeline();
+}
+
 function renderTimeline() {
   renderActivityChart();
   renderTagFilterChips();
@@ -84,7 +93,14 @@ function renderTimeline() {
         ? `<div class="entry-tags">${e.tags.map(t => `<span class="entry-tag-chip">#${escHtml(t)}</span>`).join('')}</div>`
         : '';
       return `<div class="entry-item">
-        <div class="entry-date">${ds}</div>
+        <div class="entry-item-top">
+          <div class="entry-date">${ds}</div>
+          <button class="entry-fav-btn${e.favorite ? ' active' : ''}" onclick="toggleFavorite(${e.id})" aria-label="お気に入り">
+            <svg viewBox="0 0 24 24" fill="${e.favorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3.5l2.6 5.6 6 .8-4.4 4.3 1 6-5.2-2.9-5.2 2.9 1-6L3.4 9.9l6-.8L12 3.5Z"/>
+            </svg>
+          </button>
+        </div>
         ${e.question ? `<div class="entry-q">${escHtml(e.question)}</div>` : ''}
         <div class="entry-body">${escHtml(e.text)}</div>
         ${tagsHtml}

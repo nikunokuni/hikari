@@ -77,6 +77,7 @@ async function saveEntry() {
     text,
     tags: [...selectedEntryTags],
     visibility,
+    favorite: false,
     date: new Date().toISOString(),
   };
 
