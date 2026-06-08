@@ -24,7 +24,9 @@
   </div>
 </div>
 
-<!-- TAB BAR (always shown on the 5 main screens) -->
+<!-- APP HEADER: ロゴ + タブバー（5つの主要画面で常に表示） -->
+<header class="app-header" id="app-header">
+<div class="app-logo">ひかり</div>
 <nav class="tab-bar" id="tab-bar">
   <button class="tab-btn active" data-tab="home" onclick="showScreen('home')" aria-label="ホーム画面">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -56,13 +58,10 @@
     </svg>
   </button>
 </nav>
+</header>
 
 <!-- HOME -->
 <div id="home" class="screen has-tabs active">
-  <div class="home-header">
-    <div class="home-logo">ひかり</div>
-    <div class="home-sub">心の声を聴く場所</div>
-  </div>
   <div class="home-welcome">
     <p id="welcome-text">おかえり。<br>今日も、ここにいていい。</p>
   </div>
@@ -72,32 +71,13 @@
     <span id="active-count">—</span>
   </div>
 
-  <button class="btn-primary" onclick="goWrite()">書く</button>
-
-  <div class="question-card" onclick="goWriteWithDailyQuestion()">
+  <div class="question-card">
     <div class="question-label">今日の問いかけ</div>
     <div class="question-text" id="home-question">
       <span class="loading-dots"><span></span><span></span><span></span></span>
     </div>
   </div>
   <button class="link-btn" onclick="showScreen('questions')">ほかの問いも見てみる →</button>
-
-  <div class="bottom-row">
-    <div class="streak-box">
-      <div class="streak-num" id="streak-num">0</div>
-      <div class="streak-label">日つづいています</div>
-    </div>
-    <div class="stamp-box" onclick="showScreen('important')">
-      <div class="stamp-preview" id="stamp-preview">🌟</div>
-      <div class="streak-label">スタンプ</div>
-    </div>
-  </div>
-</div>
-
-<!-- WRITE -->
-<div id="write" class="screen">
-  <button class="back-btn" onclick="showScreen('home')">← もどる</button>
-  <div class="write-question" id="write-question"></div>
 
   <div class="entry-tag-section">
     <div class="entry-tag-label">今日の気配（いくつでも、なくても）</div>
@@ -124,6 +104,13 @@
   </div>
 
   <button class="save-btn" id="save-btn" onclick="saveEntry()">そっとしまう</button>
+
+  <div class="bottom-row">
+    <div class="stamp-box" onclick="showScreen('important')">
+      <div class="stamp-preview" id="stamp-preview">🌟</div>
+      <div class="streak-label">スタンプ</div>
+    </div>
+  </div>
 </div>
 
 <!-- QUESTIONS -->

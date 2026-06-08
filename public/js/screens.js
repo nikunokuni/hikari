@@ -7,9 +7,9 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 
-  const tabBar = document.getElementById('tab-bar');
+  const appHeader = document.getElementById('app-header');
   const onTabScreen = TAB_SCREENS.includes(id);
-  tabBar.classList.toggle('hidden', !onTabScreen);
+  appHeader.classList.toggle('hidden', !onTabScreen);
   if (onTabScreen) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
   }

@@ -44,21 +44,31 @@ body {
   margin: 0 auto;
 }
 .screen.active { display: flex; flex-direction: column; }
-.screen.has-tabs { padding-top: 70px; }
+.screen.has-tabs { padding-top: 112px; }
 
-/* ===== TAB BAR (常に画面上部に表示) ===== */
-.tab-bar {
+/* ===== APP HEADER（ロゴ + タブバー、常に画面上部に表示） ===== */
+.app-header {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 50;
-  display: flex;
   max-width: 480px;
   margin: 0 auto;
   background: rgba(9,9,15,0.78);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border2);
 }
-.tab-bar.hidden { display: none; }
+.app-header.hidden { display: none; }
+.app-logo {
+  text-align: center;
+  font-family: 'Zen Antique Soft', serif;
+  font-size: 19px;
+  color: var(--gold2);
+  letter-spacing: 0.35em;
+  padding: 14px 0 8px;
+}
+.tab-bar {
+  display: flex;
+}
 .tab-btn {
   flex: 1;
   display: flex;
@@ -77,22 +87,6 @@ body {
 .tab-btn.active { color: var(--gold2); border-bottom-color: var(--gold); }
 
 /* ===== HOME ===== */
-.home-header {
-  padding: 16px 0 16px;
-  text-align: center;
-}
-.home-logo {
-  font-family: 'Zen Antique Soft', serif;
-  font-size: 30px;
-  color: var(--gold2);
-  letter-spacing: 0.35em;
-  margin-bottom: 4px;
-}
-.home-sub {
-  font-size: 11px;
-  color: var(--text3);
-  letter-spacing: 0.28em;
-}
 .home-welcome {
   text-align: center;
   margin: 28px 0 20px;
@@ -216,7 +210,7 @@ body {
   gap: 12px;
   margin-top: 36px;
 }
-.streak-box, .stamp-box {
+.stamp-box {
   flex: 1;
   text-align: center;
   padding: 20px 12px;
@@ -226,11 +220,6 @@ body {
   cursor: pointer;
 }
 .stamp-box:hover { border-color: var(--border); }
-.streak-num {
-  font-family: 'Zen Antique Soft', serif;
-  font-size: 34px;
-  color: var(--gold);
-}
 .stamp-preview { font-size: 28px; margin-bottom: 4px; }
 .streak-label { font-size: 10px; color: var(--text3); letter-spacing: 0.2em; margin-top: 4px; }
 
@@ -265,16 +254,6 @@ body {
 }
 
 /* ===== WRITE ===== */
-.write-question {
-  font-family: 'Zen Antique Soft', serif;
-  font-size: 17px;
-  color: var(--text2);
-  line-height: 2;
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border2);
-  padding-top: 8px;
-}
 .entry-tag-section { margin-bottom: 18px; }
 .entry-tag-label {
   font-size: 10px;

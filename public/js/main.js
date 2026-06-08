@@ -4,12 +4,13 @@
    ========================================== */
 
 load();
-updateStreak();
+renderEntryTags();
 updateActiveUsers();
 
 syncWithBackend().then(() => {
   generateDailyQuestion();
   scheduleMemory();
+  updateStreak();
 });
 
 setInterval(updateActiveUsers, 60000);

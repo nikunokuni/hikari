@@ -47,7 +47,6 @@ const GOAL_TAG_PRESETS = [...ENTRY_TAG_PRESETS, '毎日書く'];
 const ACHIEVEMENT_STAMPS = ['🏅','🎖️','🏆','💎','👑','🌈','🎉','🔮','🪄','🌠'];
 
 // ===== STATE =====
-let currentQuestion = '';
 let dailyQuestion = '';
 let visibility = 'private';
 let entries = [];

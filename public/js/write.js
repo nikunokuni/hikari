@@ -3,11 +3,7 @@
    「書く」画面：気配タグの選択・記録の保存・つづく日数
    ========================================== */
 
-function goWrite(question) {
-  showScreen('write');
-  currentQuestion = question || '';
-  document.getElementById('write-question').textContent = currentQuestion || '今、心にあることを、そのままに。';
-
+function resetWriteForm() {
   const input = document.getElementById('journal-input');
   input.value = '';
   input.style.height = 'auto';
@@ -19,10 +15,6 @@ function goWrite(question) {
 
   selectedEntryTags = [];
   renderEntryTags();
-}
-
-function goWriteWithDailyQuestion() {
-  goWrite(dailyQuestion);
 }
 
 // ===== ENTRY TAGS (今日の気配) =====
@@ -81,7 +73,7 @@ async function saveEntry() {
 
   const entry = {
     id: Date.now(),
-    question: currentQuestion,
+    question: dailyQuestion,
     text,
     tags: [...selectedEntryTags],
     visibility,
@@ -92,7 +84,6 @@ async function saveEntry() {
   const achievedGoals = checkGoalAchievements();
   save();
   await pushToBackend();
-  updateStreak();
   spawnParticles();
 
   if (achievedGoals.length) {
@@ -104,12 +95,13 @@ async function saveEntry() {
   } else {
     showToast('そっとしまいました。');
   }
-  setTimeout(() => showScreen('home'), 700);
+
+  resetWriteForm();
 }
 
 // ===== STREAK =====
 function updateStreak() {
-  if (!entries.length) { document.getElementById('streak-num').textContent = '0'; return; }
+  if (!entries.length) { showToast('0日つづいています'); return; }
   const dates = entries.map(e => {
     const d = new Date(e.date); d.setHours(0,0,0,0); return d.getTime();
   });
@@ -119,5 +111,5 @@ function updateStreak() {
     if (unique[i-1] - unique[i] === 86400000) streak++;
     else break;
   }
-  document.getElementById('streak-num').textContent = streak;
+  showToast(`${streak}日つづいています`);
 }

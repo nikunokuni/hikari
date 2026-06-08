@@ -26,7 +26,6 @@ function selectQuestion(q) {
   dailyQuestion = q;
   document.getElementById('home-question').textContent = q;
   showScreen('home');
-  setTimeout(() => goWrite(q), 150);
 }
 
 // ===== DAILY QUESTION =====

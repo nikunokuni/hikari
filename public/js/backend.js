@@ -18,7 +18,6 @@ async function syncWithBackend() {
       stampBoard = d.stampBoard || [];
       aiAnalysis = d.aiAnalysis || '';
       save();
-      updateStreak();
     } else {
       await pushToBackend();
     }
