@@ -74,9 +74,6 @@ function renderStampBoard() {
   board.innerHTML = stampBoard.length
     ? stampBoard.map(s => `<div class="board-stamp">${s}</div>`).join('')
     : '<div class="stamp-board-empty">スタンプがここに積み重なります</div>';
-
-  const latest = stampBoard.length ? stampBoard[stampBoard.length - 1] : '🌟';
-  document.getElementById('stamp-preview').textContent = latest;
 }
 
 function renderStamps() {
