@@ -211,6 +211,12 @@
   </div>
 
   <div class="settings-group">
+    <div class="settings-group-label">データ</div>
+    <button class="btn-primary" onclick="manualClearCache()">キャッシュを削除して再読み込み</button>
+    <p class="settings-text settings-text-muted">書いた記録は消えません。表示が古いと感じたときにお試しください。</p>
+  </div>
+
+  <div class="settings-group">
     <div class="settings-group-label">そのほか</div>
     <p class="settings-text settings-text-muted">フィードバック、プライバシーポリシー、利用規約などは、近いうちにここへ加えていく予定です。</p>
   </div>
@@ -219,6 +225,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="js/core.js"></script>
+<script src="js/version.js"></script>
 <script src="js/backend.js"></script>
 <script src="js/screens.js"></script>
 <script src="js/write.js"></script>

@@ -3,14 +3,19 @@
    起動シーケンス（すべての機能ファイルが揃ったあとに実行する）
    ========================================== */
 
-load();
-renderEntryTags();
-updateActiveUsers();
+(async () => {
+  // バージョンが上がっていれば、古いキャッシュを片付けて再読み込みする
+  if (await checkAppVersion()) return;
 
-syncWithBackend().then(() => {
-  generateDailyQuestion();
-  scheduleMemory();
-  updateStreak();
-});
+  load();
+  renderEntryTags();
+  updateActiveUsers();
 
-setInterval(updateActiveUsers, 60000);
+  syncWithBackend().then(() => {
+    generateDailyQuestion();
+    scheduleMemory();
+    updateStreak();
+  });
+
+  setInterval(updateActiveUsers, 60000);
+})();
