@@ -14,7 +14,8 @@
   syncWithBackend().then(() => {
     generateDailyQuestion();
     scheduleMemory();
-    updateStreak();
+    updateWeeklyProgress();
+    applyHikariColor();
   });
 
   setInterval(updateActiveUsers, 60000);

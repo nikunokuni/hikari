@@ -70,8 +70,47 @@ async function toggleFavorite(id) {
   renderTimeline();
 }
 
+// 月ごとの「育っていく自分」のふりかえりレポート
+function renderMonthlyReport() {
+  const card = document.getElementById('monthly-report-card');
+  if (!card) return;
+
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const monthEntries = entries.filter(e => {
+    const d = new Date(e.date);
+    return d.getFullYear() === y && d.getMonth() === m;
+  });
+
+  if (!monthEntries.length) {
+    card.classList.add('hidden');
+    return;
+  }
+  card.classList.remove('hidden');
+
+  const days = new Set(monthEntries.map(e => {
+    const d = new Date(e.date); d.setHours(0,0,0,0); return d.getTime();
+  }));
+
+  const tagCounts = {};
+  monthEntries.forEach(e => (e.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
+  const topTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]).slice(0, 2);
+
+  document.getElementById('monthly-report-title').textContent = `✦ ${y}年${m + 1}月のひかり`;
+  document.getElementById('monthly-report-count').textContent = `${days.size}回、自分と向き合いました`;
+
+  const tagsEl = document.getElementById('monthly-report-tags');
+  if (topTags.length) {
+    tagsEl.textContent = `よく現れたのは「${topTags.join('」「')}」`;
+    tagsEl.classList.remove('hidden');
+  } else {
+    tagsEl.classList.add('hidden');
+  }
+}
+
 function renderTimeline() {
   renderActivityChart();
+  renderMonthlyReport();
   renderTagFilterChips();
 
   const list = document.getElementById('entry-list');

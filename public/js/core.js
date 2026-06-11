@@ -50,6 +50,16 @@ const ENTRY_TAG_PRESETS = ['心の声', '体の声', '自信', 'ネガティブ'
 const GOAL_TAG_PRESETS = [...ENTRY_TAG_PRESETS, '毎日書く'];
 const ACHIEVEMENT_STAMPS = ['🏅','🎖️','🏆','💎','👑','🌈','🎉','🔮','🪄','🌠'];
 
+// 「今日の気配」タグごとの色。その日選んだ気配の色合いに「ひかり」のロゴが灯る
+const ENTRY_TAG_COLORS = {
+  '心の声':    '#b39ddb',
+  '体の声':    '#8fcb9b',
+  '自信':      '#f3b562',
+  'ネガティブ': '#8aa6c9',
+  '心地よさ':  '#f2a6c6',
+  'ご縁':      '#7fd1c9',
+};
+
 // ===== STATE =====
 let dailyQuestion = '';
 let visibility = 'private';

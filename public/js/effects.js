@@ -31,6 +31,38 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2400);
 }
 
+// ===== ひかりの色（今日の気配タグから自動で決まる） =====
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+// 今日すでに記録した気配 + 今選んでいる気配を合わせた一覧
+function todaysEntryTags() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const savedTags = entries
+    .filter(e => { const d = new Date(e.date); d.setHours(0,0,0,0); return d.getTime() === today.getTime(); })
+    .flatMap(e => e.tags || []);
+  return [...new Set([...savedTags, ...selectedEntryTags])];
+}
+
+// 「ひかり」のロゴの色を、今日の気配タグの色合いに合わせる
+function applyHikariColor() {
+  const tags = todaysEntryTags().filter(t => ENTRY_TAG_COLORS[t]);
+  const root = document.documentElement.style;
+  if (!tags.length) {
+    root.removeProperty('--hikari-color');
+    return;
+  }
+  const sum = [0, 0, 0];
+  tags.forEach(t => {
+    const rgb = hexToRgb(ENTRY_TAG_COLORS[t]);
+    sum[0] += rgb[0]; sum[1] += rgb[1]; sum[2] += rgb[2];
+  });
+  const mix = sum.map(v => Math.round(v / tags.length));
+  root.setProperty('--hikari-color', `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`);
+}
+
 // ===== STAR CANVAS (背景粒子) =====
 (function () {
   const canvas = document.getElementById('starCanvas');

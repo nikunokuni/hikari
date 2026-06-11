@@ -29,6 +29,7 @@ function renderEntryTags() {
   row.innerHTML = entryTagOptions().map(t =>
     `<button class="etag-btn${selectedEntryTags.includes(t) ? ' active' : ''}" data-tag="${escHtml(t)}" onclick="toggleEntryTag(this.dataset.tag)">${escHtml(t)}</button>`
   ).join('');
+  applyHikariColor();
 }
 
 function toggleEntryTag(tag) {
@@ -100,17 +101,19 @@ async function saveEntry() {
   resetWriteForm();
 }
 
-// ===== STREAK =====
-function updateStreak() {
-  if (!entries.length) { showToast('0日つづいています'); return; }
-  const dates = entries.map(e => {
-    const d = new Date(e.date); d.setHours(0,0,0,0); return d.getTime();
-  });
-  const unique = [...new Set(dates)].sort((a,b) => b-a);
-  let streak = 1;
-  for (let i = 1; i < unique.length; i++) {
-    if (unique[i-1] - unique[i] === 86400000) streak++;
-    else break;
-  }
-  showToast(`${streak}日つづいています`);
+// ===== WEEKLY PROGRESS（今週、何回自分と向き合えたか） =====
+function updateWeeklyProgress() {
+  const now = new Date();
+  const diffToMonday = (now.getDay() + 6) % 7; // 月曜始まり
+  const monday = new Date(now);
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - diffToMonday);
+
+  const days = new Set(entries
+    .map(e => { const d = new Date(e.date); d.setHours(0,0,0,0); return d.getTime(); })
+    .filter(t => t >= monday.getTime())
+  );
+
+  if (days.size === 0) showToast('今週も、ここから始めましょう。');
+  else showToast(`今週は${days.size}回、自分と向き合えました。`);
 }
