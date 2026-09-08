@@ -5,7 +5,7 @@
 
 // アプリのバージョン。デプロイのたびに上げると、
 // 古いキャッシュを持つ利用者の画面が自動で整理・再読み込みされる
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 
 // 匿名ログイン代替用のUUID
 let userId = localStorage.getItem('hikari_user_id');
@@ -64,7 +64,6 @@ let visibility = 'private';
 let entries = [];
 let memos = [];
 let aiAnalysis = '';
-let activeMemocat = '内省の方向性'; // 新カテゴリのデフォルト
 let activeCat = 'からだ';
 let memoryPopupEnabled = true;
 let selectedEntryTags = [];
@@ -85,12 +84,12 @@ function load() {
   try { aiAnalysis= localStorage.getItem('hikari_analysis')            || ''; } catch { aiAnalysis = ''; }
   memoryPopupEnabled = localStorage.getItem('hikari_memory_popup') !== '0';
 
-  // 初めてアプリを使うユーザーに、迷わないための「内省の方向性（ガイド）」をプリセット
+  // 初めてアプリを使うユーザーに、迷わないためのガイドをプリセット
   if (memos.length === 0) {
     memos = [
-      { id: 1, text: "今日、からだがホッとした瞬間はどこでしたか？（からだの声）", cat: "内省の方向性" },
-      { id: 2, text: "最近、自分の心が『少し窮屈だな』と感じたのはどんな場面でしたか？（きもちの整理）", cat: "内省の方向性" },
-      { id: 3, text: "嬉しかったことではなく、『ただ、ほっとしたこと』を1つ探してみる。（心地よさの探求）", cat: "内省の方向性" }
+      { id: 1, text: "今日、からだがホッとした瞬間はどこでしたか？" },
+      { id: 2, text: "最近、自分の心が『少し窮屈だな』と感じたのはどんな場面でしたか？" },
+      { id: 3, text: "嬉しかったことではなく、『ただ、ほっとしたこと』を1つ探してみる。" }
     ];
     save();
   }

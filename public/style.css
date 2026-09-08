@@ -641,39 +641,6 @@ body {
 .memo-input::placeholder { color: var(--text3); }
 .memo-input:focus { border-bottom-color: var(--border); }
 
-/* カテゴリレイアウト：スマートフォン用に回り込み可能にする */
-.memo-cats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 14px;
-}
-.mcat-btn {
-  padding: 6px 12px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  color: var(--text3);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: 'Noto Sans JP', sans-serif;
-}
-.mcat-btn.active {
-  border-color: var(--gold);
-  color: var(--gold2);
-  background: rgba(201,168,76,0.06);
-}
-
-.memo-group { margin-bottom: 24px; }
-.memo-group-label {
-  font-size: 10px;
-  color: var(--gold);
-  letter-spacing: 0.3em;
-  margin-bottom: 10px;
-  padding: 0 4px;
-}
 .memo-item {
   display: flex;
   align-items: center;
