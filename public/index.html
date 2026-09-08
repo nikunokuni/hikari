@@ -140,50 +140,24 @@
   <div class="entry-list" id="entry-list"></div>
 </div>
 
-<!-- IMPORTANT (気をつけること + スタンプ を統合) -->
+<!-- IMPORTANT (気をつけること) -->
 <div id="important" class="screen has-tabs">
   <div class="screen-title">大事なもの</div>
-  <div class="screen-sub">心に留めたいことと、自分だけの歩み。</div>
+  <div class="screen-sub">心に留めたいことを、そっと置いておく場所。</div>
 
-  <div class="important-subtabs">
-    <button class="isub-btn active" data-sub="memos" onclick="selectImportantSub('memos')">気をつけること</button>
-    <button class="isub-btn" data-sub="stamps" onclick="selectImportantSub('stamps')">スタンプ</button>
-  </div>
-
-  <div id="important-memos">
-    <div class="memo-add-form">
-      <input type="text" id="memo-input" class="memo-input" placeholder="心に留めたいことを書く…" maxlength="60">
-      <div class="memo-cats">
-        <button class="mcat-btn active" data-cat="内省の方向性" onclick="selectMemoCat('内省の方向性')">内省の方向性</button>
-        <button class="mcat-btn" data-cat="普段の心がけ" onclick="selectMemoCat('普段の心がけ')">普段の心がけ</button>
-        <button class="mcat-btn" data-cat="自信の蓄積" onclick="selectMemoCat('自信の蓄積')">自信の蓄積</button>
-        <button class="mcat-btn" data-cat="日々の気づき" onclick="selectMemoCat('日々の気づき')">日々の気づき</button>
-        <button class="mcat-btn" data-cat="内省のメモ" onclick="selectMemoCat('内省のメモ')">内省のメモ</button>
-      </div>
-      <button class="btn-primary" style="margin-top:12px" onclick="addMemo()">追加する</button>
+  <div class="memo-add-form">
+    <input type="text" id="memo-input" class="memo-input" placeholder="心に留めたいことを書く…" maxlength="60">
+    <div class="memo-cats">
+      <button class="mcat-btn active" data-cat="内省の方向性" onclick="selectMemoCat('内省の方向性')">内省の方向性</button>
+      <button class="mcat-btn" data-cat="普段の心がけ" onclick="selectMemoCat('普段の心がけ')">普段の心がけ</button>
+      <button class="mcat-btn" data-cat="自信の蓄積" onclick="selectMemoCat('自信の蓄積')">自信の蓄積</button>
+      <button class="mcat-btn" data-cat="日々の気づき" onclick="selectMemoCat('日々の気づき')">日々の気づき</button>
+      <button class="mcat-btn" data-cat="内省のメモ" onclick="selectMemoCat('内省のメモ')">内省のメモ</button>
     </div>
-
-    <div id="memo-list"></div>
+    <button class="btn-primary" style="margin-top:12px" onclick="addMemo()">追加する</button>
   </div>
 
-  <div id="important-stamps" class="hidden">
-    <div class="stamp-goal-form">
-      <div class="screen-sub" style="margin:0 0 8px">どんなことを、何回？</div>
-      <div class="goal-tag-row" id="goal-tag-row"></div>
-      <input type="text" id="goal-tag-custom" class="memo-input hidden" placeholder="タグを書く（例：朝の散歩）" maxlength="20">
-      <div class="goal-target-row">
-        <span class="goal-target-label">目標</span>
-        <input type="number" id="goal-target-input" class="goal-target-input" min="1" max="999" placeholder="10">
-        <span class="goal-target-label">回 で、スタンプがひとつ</span>
-      </div>
-      <button class="btn-primary" style="margin-top:12px" onclick="addGoal()">目標を作る</button>
-    </div>
-
-    <div id="goal-list"></div>
-
-    <div class="stamp-board-title">スタンプボード</div>
-    <div id="stamp-board"></div>
-  </div>
+  <div id="memo-list"></div>
 </div>
 
 <!-- COMMUNITY (言葉のない、瞬くだけの星座空間) -->
@@ -239,7 +213,6 @@
 <script src="js/questions.js"></script>
 <script src="js/important.js"></script>
 <script src="js/memos.js"></script>
-<script src="js/goals.js"></script>
 <script src="js/community.js"></script>
 <script src="js/memory.js"></script>
 <script src="js/settings.js"></script>

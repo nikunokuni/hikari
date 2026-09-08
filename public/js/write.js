@@ -83,20 +83,10 @@ async function saveEntry() {
   };
 
   entries.unshift(entry);
-  const achievedGoals = checkGoalAchievements();
   save();
   await pushToBackend();
   spawnParticles();
-
-  if (achievedGoals.length) {
-    const g = achievedGoals[0];
-    setTimeout(() => {
-      spawnParticlesFrom(null, g.stamp);
-      showToast(`✦ 「${g.tag}」の目標を達成しました。${g.stamp} が灯りました。`);
-    }, 800);
-  } else {
-    showToast('そっとしまいました。');
-  }
+  showToast('そっとしまいました。');
 
   resetWriteForm();
 }

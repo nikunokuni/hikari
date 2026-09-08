@@ -616,27 +616,6 @@ body {
   line-height: 2.2;
 }
 
-/* ===== IMPORTANT (気をつけること + スタンプ) ===== */
-.important-subtabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-.isub-btn {
-  flex: 1;
-  padding: 10px;
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  color: var(--text3);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  transition: all 0.25s;
-  font-family: 'Noto Sans JP', sans-serif;
-}
-.isub-btn.active { border-color: var(--gold); color: var(--gold2); background: rgba(201,168,76,0.06); }
-
 /* ===== MEMOS ===== */
 .memo-add-form {
   background: var(--bg2);
@@ -718,110 +697,6 @@ body {
   transition: opacity 0.2s;
 }
 .memo-delete:hover { opacity: 1; }
-
-/* ===== STAMPS ===== */
-.stamp-goal-form {
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 24px;
-}
-.goal-tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
-}
-.gtag-btn {
-  padding: 6px 12px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  color: var(--text3);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: 'Noto Sans JP', sans-serif;
-}
-.gtag-btn.active {
-  border-color: var(--gold);
-  color: var(--gold2);
-  background: rgba(201,168,76,0.06);
-}
-#goal-tag-custom { margin-top: 10px; }
-.goal-target-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-.goal-target-label { font-size: 11px; color: var(--text3); letter-spacing: 0.1em; }
-.goal-target-input {
-  width: 56px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border2);
-  color: var(--text);
-  font-size: 14px;
-  text-align: center;
-  padding: 4px 0;
-  font-family: 'Noto Sans JP', sans-serif;
-}
-.goal-target-input:focus { outline: none; border-bottom-color: var(--border); }
-
-.goal-item {
-  padding: 16px;
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  margin-bottom: 10px;
-  transition: border-color 0.3s;
-}
-.goal-item.achieved { border-color: var(--gold); background: rgba(201,168,76,0.06); }
-.goal-info { flex: 1; }
-.goal-tag-name { font-size: 14px; color: var(--text2); margin-bottom: 8px; letter-spacing: 0.05em; }
-.goal-progress-bar {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--bg3);
-  overflow: hidden;
-}
-.goal-progress-fill {
-  height: 100%;
-  background: var(--gold);
-  border-radius: 3px;
-  transition: width 0.4s ease;
-}
-.goal-count { font-size: 11px; color: var(--text3); letter-spacing: 0.1em; margin-top: 6px; }
-
-.stamp-board-title {
-  font-size: 10px;
-  color: var(--gold);
-  letter-spacing: 0.3em;
-  margin: 28px 0 14px;
-  text-align: center;
-}
-#stamp-board {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
-  min-height: 60px;
-  padding: 16px;
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-}
-.board-stamp { font-size: 24px; line-height: 1; }
-.stamp-board-empty {
-  color: var(--text3);
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  padding: 8px;
-  text-align: center;
-}
 
 /* ===== COMMUNITY (星座空間) ===== */
 .constellation-wrapper {

@@ -5,7 +5,7 @@
 
 // アプリのバージョン。デプロイのたびに上げると、
 // 古いキャッシュを持つ利用者の画面が自動で整理・再読み込みされる
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 // 匿名ログイン代替用のUUID
 let userId = localStorage.getItem('hikari_user_id');
@@ -45,10 +45,8 @@ const QUESTIONS = {
   ],
 };
 
-// 記録に付けられる「気配」タグ（プリセット）。目標のタグもこれに合わせる
+// 記録に付けられる「気配」タグ（プリセット）
 const ENTRY_TAG_PRESETS = ['心の声', '体の声', '自信', 'ネガティブ', '心地よさ', 'ご縁'];
-const GOAL_TAG_PRESETS = [...ENTRY_TAG_PRESETS, '毎日書く'];
-const ACHIEVEMENT_STAMPS = ['🏅','🎖️','🏆','💎','👑','🌈','🎉','🔮','🪄','🌠'];
 
 // 「今日の気配」タグごとの色。その日選んだ気配の色合いに「ひかり」のロゴが灯る
 const ENTRY_TAG_COLORS = {
@@ -65,13 +63,9 @@ let dailyQuestion = '';
 let visibility = 'private';
 let entries = [];
 let memos = [];
-let goals = [];
-let stampBoard = [];
 let aiAnalysis = '';
 let activeMemocat = '内省の方向性'; // 新カテゴリのデフォルト
-let selectedGoalTag = GOAL_TAG_PRESETS[0];
 let activeCat = 'からだ';
-let activeImportantSub = 'memos';
 let memoryPopupEnabled = true;
 let selectedEntryTags = [];
 let timelineTagFilter = null;
@@ -88,8 +82,6 @@ function logError(context, error) {
 function load() {
   try { entries   = JSON.parse(localStorage.getItem('hikari_entries')   || '[]'); } catch { entries = []; }
   try { memos     = JSON.parse(localStorage.getItem('hikari_memos')     || '[]'); } catch { memos = []; }
-  try { goals     = JSON.parse(localStorage.getItem('hikari_goals')     || '[]'); } catch { goals = []; }
-  try { stampBoard= JSON.parse(localStorage.getItem('hikari_stamps')    || '[]'); } catch { stampBoard = []; }
   try { aiAnalysis= localStorage.getItem('hikari_analysis')            || ''; } catch { aiAnalysis = ''; }
   memoryPopupEnabled = localStorage.getItem('hikari_memory_popup') !== '0';
 
@@ -107,8 +99,6 @@ function load() {
 function save() {
   localStorage.setItem('hikari_entries',  JSON.stringify(entries));
   localStorage.setItem('hikari_memos',    JSON.stringify(memos));
-  localStorage.setItem('hikari_goals',    JSON.stringify(goals));
-  localStorage.setItem('hikari_stamps',   JSON.stringify(stampBoard));
   localStorage.setItem('hikari_analysis',  aiAnalysis);
 }
 

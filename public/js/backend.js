@@ -14,8 +14,6 @@ async function syncWithBackend() {
       const d = result.data;
       entries = d.entries || [];
       memos = d.memos || [];
-      goals = d.goals || [];
-      stampBoard = d.stampBoard || [];
       aiAnalysis = d.aiAnalysis || '';
       save();
     } else {
@@ -28,7 +26,7 @@ async function syncWithBackend() {
 
 async function pushToBackend() {
   try {
-    const payload = { entries, memos, goals, stampBoard, aiAnalysis };
+    const payload = { entries, memos, aiAnalysis };
     await fetch('/api/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
